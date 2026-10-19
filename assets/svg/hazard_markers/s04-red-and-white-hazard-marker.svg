@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Chevron</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="6" y="26" width="188" height="148" rx="5" fill="white"/><path d="M16 72 L16 40 L48 40 Z M184 72 L184 40 L152 40 Z M16 124 L16 92 L68 40 L94 40 L94 46 Z M184 124 L184 92 L132 40 L106 40 L106 46 Z M16 144 L94 66 L94 98 L32 160 L16 160 Z M184 144 L106 66 L106 98 L168 160 L184 160 Z M94 118 L94 150 L84 160 L52 160 Z M106 118 L106 150 L116 160 L148 160 Z" fill="#c5243d"/>
+</svg>

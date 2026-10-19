@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Youth hostel</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="13" y="8" width="174" height="184" rx="10" fill="white"/><rect x="17" y="12" width="166" height="176" rx="8" fill="#086ba8"/><rect x="24" y="19" width="152" height="162" rx="4" fill="none"/><rect x="42" y="38" width="116" height="124" rx="3" fill="white"/><g transform="translate(35 32) scale(.65)"><path d="M100 54 L153 99 H141 V154 H62 V99 H49 Z" fill="#17212b"/><rect x="89" y="111" width="25" height="43" rx="0" fill="white"/><path d="M37 42 L16 83 H29 L11 113 H32 V155 H43 V113 H60 L43 83 H56 Z" fill="#17212b"/></g>
+</svg>

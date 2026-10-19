@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Pedestrian crossing on the spot</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="13" y="8" width="174" height="184" rx="10" fill="white"/><rect x="17" y="12" width="166" height="176" rx="8" fill="#086ba8"/><rect x="24" y="19" width="152" height="162" rx="4" fill="none"/><path d="M100 32 L167 161 H33 Z" fill="white"/><g transform="translate(35 46) scale(.63)"><circle cx="105" cy="49" r="11" fill="#17212b"/><path d="M101 67 L88 104 L114 127 L122 155 M89 103 L68 149 M99 75 L124 96 L141 96 M97 75 L78 84 L66 105" fill="none" stroke="#17212b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M59 157 H73 M81 157 H95 M103 157 H117 M125 157 H139" fill="none" stroke="#086ba8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

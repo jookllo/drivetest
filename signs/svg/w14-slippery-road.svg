@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Slippery road ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><g transform="translate(28 5) scale(.7) rotate(14 100 100)"><path d="M48 111 L58 80 Q61 72 71 72 H130 Q140 72 143 80 L153 111 V144 H139 V132 H62 V144 H48 Z" fill="#17212b"/><path d="M64 106 L72 84 H129 L137 106 Z" fill="white"/><rect x="61" y="115" width="20" height="9" rx="3" fill="white"/><rect x="121" y="115" width="20" height="9" rx="3" fill="white"/></g><path d="M76 112 C46 131 115 130 72 157 M119 116 C91 139 151 135 115 159" fill="none" stroke="#17212b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

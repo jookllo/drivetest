@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">No animal drawn vehicles</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. The cart and animal are reconstructed silhouettes; confirm against a clearer original.</desc>
+<circle cx="100" cy="100" r="91" fill="#c5243d"/><circle cx="100" cy="100" r="74" fill="white"/><g transform="translate(54 45) scale(.57)"><path d="M28 111 L45 86 L100 87 L115 69 L118 48 L135 59 L153 79 L147 91 L132 85 L121 110 L137 145 L126 150 L105 120 H76 L58 151 L47 147 L57 115 L42 105 L31 136 L21 133 Z" fill="#17212b"/></g><rect x="37" y="95" width="54" height="26" rx="0" fill="#17212b"/><circle cx="51" cy="130" r="14" fill="#17212b"/><circle cx="87" cy="130" r="10" fill="#17212b"/><path d="M43 39 L158 162" fill="none" stroke="#c5243d" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

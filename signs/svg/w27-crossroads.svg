@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Junction ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. X-shaped junction symbol corrected to the user sketch on 2026-10-17.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><path d="M64 84 L136 156 M136 84 L64 156" fill="none" stroke="#17212b" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

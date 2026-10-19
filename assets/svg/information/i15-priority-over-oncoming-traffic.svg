@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Priority over oncoming traffic</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="13" y="8" width="174" height="184" rx="10" fill="white"/><rect x="17" y="12" width="166" height="176" rx="8" fill="#086ba8"/><rect x="24" y="19" width="152" height="162" rx="4" fill="none"/><g transform="translate(12 22) scale(.73)"><path d="M88 156 V78 H64 L100 39 L136 78 H112 V156 Z" fill="white"/></g><g transform="translate(76 22) scale(.73) rotate(180 100 100)"><path d="M88 156 V78 H64 L100 39 L136 78 H112 V156 Z" fill="#c5243d"/></g>
+</svg>

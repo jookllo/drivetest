@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">No U turn</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<circle cx="100" cy="100" r="91" fill="#c5243d"/><circle cx="100" cy="100" r="74" fill="white"/><g transform="translate(18 18) scale(.82)"><path d="M49 152 V78 A43 43 0 0 1 86 35 A43 43 0 0 1 135 78 V112 H157 L123 151 L89 112 H111 V78 A19 19 0 0 0 73 78 V152 Z" fill="#17212b"/></g><path d="M43 39 L158 162" fill="none" stroke="#c5243d" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

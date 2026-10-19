@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Ferry service</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Anchor symbol is clear, but the exact service label must be confirmed.</desc>
+<rect x="13" y="8" width="174" height="184" rx="10" fill="white"/><rect x="17" y="12" width="166" height="176" rx="8" fill="#086ba8"/><rect x="24" y="19" width="152" height="162" rx="4" fill="none"/><rect x="42" y="38" width="116" height="124" rx="3" fill="white"/><g transform="translate(35 32) scale(.65)"><path d="M100 61 V136 M67 91 H133 M48 114 Q100 170 152 114 M48 114 L47 134 M152 114 L153 134" fill="none" stroke="#17212b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="100" cy="49" r="12" fill="none" stroke="#17212b" stroke-width="6"/><path d="M26 166 H174 L157 184 H43 Z" fill="#17212b"/></g>
+</svg>

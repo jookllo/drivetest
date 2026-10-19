@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">No goods vehicles</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<circle cx="100" cy="100" r="91" fill="#c5243d"/><circle cx="100" cy="100" r="74" fill="white"/><g transform="translate(14 14) scale(.86)"><rect x="30" y="78" width="94" height="51" rx="3" fill="#17212b"/><path d="M126 92 H151 L170 112 V138 H126 Z" fill="#17212b"/><rect x="134" y="100" width="14" height="15" rx="1" fill="white"/><circle cx="59" cy="140" r="15" fill="#17212b"/><circle cx="144" cy="140" r="15" fill="#17212b"/></g><path d="M43 39 L158 162" fill="none" stroke="#c5243d" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

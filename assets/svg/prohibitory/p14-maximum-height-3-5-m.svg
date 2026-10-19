@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Maximum height</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<circle cx="100" cy="100" r="91" fill="#c5243d"/><circle cx="100" cy="100" r="74" fill="white"/><text x="100" y="119" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#17212b">3.5m</text><path d="M100 44 L86 28 H114 Z M100 156 L86 172 H114 Z" fill="#17212b"/>
+</svg>

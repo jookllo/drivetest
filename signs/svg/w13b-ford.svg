@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">River bed crossing ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><path d="M25 129 H48 Q100 175 151 129 H175 V166 H25 Z" fill="#17212b"/><path d="M68 125 Q79 120 90 125 T112 125 T134 125 M65 135 Q77 130 89 135 T113 135 T137 135" fill="none" stroke="#17212b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

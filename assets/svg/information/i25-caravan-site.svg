@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Caravan site</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="13" y="8" width="174" height="184" rx="10" fill="white"/><rect x="17" y="12" width="166" height="176" rx="8" fill="#086ba8"/><rect x="24" y="19" width="152" height="162" rx="4" fill="none"/><rect x="42" y="38" width="116" height="124" rx="3" fill="white"/><g transform="translate(35 32) scale(.65)"><rect x="31" y="72" width="132" height="65" rx="22" fill="#17212b"/><rect x="48" y="89" width="27" height="23" rx="3" fill="white"/><rect x="89" y="89" width="27" height="23" rx="3" fill="white"/><circle cx="66" cy="141" r="12" fill="#17212b"/><path d="M157 135 H179" fill="none" stroke="#17212b" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

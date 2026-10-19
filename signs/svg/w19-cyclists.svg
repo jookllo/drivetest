@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Cyclists ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><g transform="translate(17 31) scale(.83)"><circle cx="55" cy="127" r="26" fill="none" stroke="#17212b" stroke-width="5"/><circle cx="145" cy="127" r="26" fill="none" stroke="#17212b" stroke-width="5"/><path d="M55 127 L79 86 L108 127 H55 M79 86 H125 L108 127 M145 127 L122 71 H137 M73 76 H91" fill="none" stroke="#17212b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><circle cx="101" cy="69" r="10" fill="#17212b"/><path d="M97 84 L82 105 L113 117 M99 85 L119 97 H135" fill="none" stroke="#17212b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

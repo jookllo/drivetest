@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kenya Road Signs - Labeling & Quiz Tool</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --red-sign: #dc2626;
+      --blue-sign: #2563eb;
+      --green-sign: #16a34a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background: #1e293b;
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .title-group h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge-count {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+
+    .stats {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    button {
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    button:hover { background: #334155; }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    button.primary:hover { background: var(--accent-hover); }
+
+    .container {
+      max-width: 1400px;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      background: #1e293b;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .search-input:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+
+    .pills {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 20px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .pill.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      border-color: #475569;
+    }
+
+    .card-img-wrap {
+      background: #ffffff;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 180px;
+      position: relative;
+    }
+
+    .card-img-wrap img {
+      max-width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+    }
+
+    .cat-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      color: white;
+    }
+
+    .cat-warning { background: var(--red-sign); }
+    .cat-regulatory { background: #dc2626; }
+    .cat-priority { background: #b91c1c; }
+    .cat-prohibitory { background: #ea580c; }
+    .cat-mandatory { background: var(--blue-sign); }
+    .cat-information { background: #0284c7; }
+    .cat-direction { background: var(--green-sign); }
+    .cat-hazard_markers { background: #d97706; }
+    .cat-supplementary { background: #64748b; }
+    .cat-controls { background: #7c3aed; }
+
+    .code-tag {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .card-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .card-desc {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .verified-chip {
+      font-size: 0.75rem;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 { font-size: 1.3rem; }
+
+    .modal-content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .modal-content-grid { grid-template-columns: 1fr; }
+    }
+
+    .preview-box {
+      background: #ffffff;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      gap: 1rem;
+      border: 1px solid var(--border);
+    }
+
+    .preview-box img {
+      max-width: 220px;
+      max-height: 220px;
+      object-fit: contain;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .file-drop-area {
+      border: 2px dashed var(--border);
+      padding: 0.75rem;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .file-drop-area:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-content">
+    <div class="title-group">
+      <h1>🚦 Kenya Road Signs Labeler</h1>
+      <span class="badge-count" id="totalCount">144 Signs</span>
+      <span class="stats" id="statsText">0 verified</span>
+    </div>
+    <div class="actions">
+      <a href="signs/index.html" style="text-decoration:none;"><button style="background:#0f172a; color:#38bdf8; border:1px solid #334155;">🎨 Direct SVG Gallery</button></a>
+      <select id="viewMode" style="background:#0f172a; color:#fff; border:1px solid #334155; padding:0.5rem; border-radius:6px; font-size:0.875rem;">
+        <option value="svg">Mode: Vector SVG</option>
+      </select>
+      <button class="primary" id="btnExportJson">📥 Export JSON</button>
+      <button id="btnImportJson" style="background:#1e293b; color:#38bdf8; border:1px solid #334155;">📂 Import JSON</button>
+      <input id="importJsonFileInput" type="file" accept=".json,application/json" style="display:none;">
+      <button id="btnExportCsv">📄 Export CSV</button>
+      <button id="btnExportJs">⚡ Export JS Quiz</button>
+      <button id="btnResetData" style="background:#334155; color:#cbd5e1;">↺ Reset Defaults</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="filter-bar">
+    <div class="search-row">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search by name, official code (e.g. W.1, P.24), or meaning...">
+      <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; cursor:pointer;">
+        <input type="checkbox" id="filterVerifiedOnly"> Show Verified Only
+      </label>
+    </div>
+    <div class="pills" id="categoryPills">
+      <div class="pill active" data-cat="all">All (123)</div>
+      <div class="pill" data-cat="warning">Warning</div>
+      <div class="pill" data-cat="priority">Priority</div>
+      <div class="pill" data-cat="mandatory">Mandatory</div>
+      <div class="pill" data-cat="prohibitory">Prohibitory</div>
+      <div class="pill" data-cat="information">Information</div>
+      <div class="pill" data-cat="direction">Direction</div>
+      <div class="pill" data-cat="hazard_markers">Hazard Markers</div>
+      <div class="pill" data-cat="controls">Vehicle Controls</div>
+    </div>
+  </div>
+
+  <div class="grid" id="signsGrid"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Edit Sign</h2>
+      <button id="btnCloseModal">✕</button>
+    </div>
+    <div class="modal-content-grid">
+      <div class="preview-box">
+        <img id="modalPreviewImg" src="" alt="Sign preview">
+        <label class="file-drop-area">
+          <span>📁 Replace image / SVG file</span>
+          <input type="file" id="modalFileInput" accept="image/*,.svg" style="display:none;">
+        </label>
+      </div>
+      <div>
+        <div class="form-group">
+          <label>Official Code</label>
+          <input type="text" id="modalCode">
+        </div>
+        <div class="form-group">
+          <label>Sign Name</label>
+          <input type="text" id="modalName">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="modalCategory">
+            <option value="warning">Warning</option>
+            <option value="regulatory">Regulatory</option>
+            <option value="mandatory">Mandatory</option>
+            <option value="priority">Priority</option>
+            <option value="prohibitory">Prohibitory</option>
+            <option value="information">Information</option>
+            <option value="direction">Direction</option>
+            <option value="hazard_markers">Hazard Markers</option>
+            <option value="supplementary">Supplementary</option>
+            <option value="controls">Vehicle Controls</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Meaning / Rule</label>
+          <textarea id="modalMeaning"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Quiz Question</label>
+          <input type="text" id="modalQuestion">
+        </div>
+        <div class="form-group">
+          <label>Quiz Answer</label>
+          <textarea id="modalAnswer"></textarea>
+        </div>
+        <div style="margin-top:1rem; display:flex; justify-content:space-between; align-items:center;">
+          <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; cursor:pointer;">
+            <input type="checkbox" id="modalVerified"> Mark as Verified
+          </label>
+          <button class="primary" id="btnSaveModal">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="signs/label-rules.js"></script>
+<script>
+  let signsData = [];
+  let currentFilterCat = 'all';
+  let currentSearch = '';
+  let showVerifiedOnly = false;
+  let viewMode = 'svg';
+  let editingSignId = null;
+
+  async function loadData() {
+    try {
+      const saved = localStorage.getItem('drivetest_signs_metadata_v2');
+      if (saved) {
+        signsData = JSON.parse(saved);
+      } else {
+        const resp = await fetch('signs_metadata.json');
+        signsData = await resp.json();
+      }
+      // Preserve user-entered names; only apply the explicitly requested recovery once.
+      if (!localStorage.getItem('drivetest-ferry-name-restored-v1')) {
+        if (saved) localStorage.setItem('drivetest-metadata-before-ferry-restore-v1', saved);
+        signsData.forEach(s => { if(s.id === 'i28-harbour-or-ferry' && s.name === 'Harbour or ferry') s.name = 'Ferry service'; });
+        if (saved) saveData();
+        localStorage.setItem('drivetest-ferry-name-restored-v1', '1');
+      }
+      // Consolidate only the four additional-panel records, preserving all other edits.
+      if (signsData.some(s => ['a01-direction-right','a02-direction-both-ways','a03-direction-left','a04-distance-15-m'].includes(s.id))) {
+        localStorage.setItem('drivetest-before-additional-panels-v1', JSON.stringify(signsData));
+        signsData = signsData.filter(s => !['a01-direction-right','a02-direction-both-ways','a03-direction-left','a04-distance-15-m'].includes(s.id));
+        if (!signsData.some(s => s.id === 'ap01-additional-panels')) signsData.push({"id": "ap01-additional-panels", "code": "AP01", "name": "Additional panels", "category": "supplementary", "meaning": "Additional panels.", "svg_path": "signs/svg/ap01-additional-panels.svg", "quiz_question": "What are these signs called?", "quiz_answer": "Additional panels", "source": "IMG-20261014-WA0091.jpg", "status": "needs-verification", "notes": "Combined right arrow, both-way arrow, left arrow, and 15 m distance panels at the user request. Classification remains for review.", "verified": false});
+        saveData();
+      }
+      const nameRevision = "drivetest-metadata-export-360f38d81ce2";
+      if (!localStorage.getItem(nameRevision)) {
+        localStorage.setItem(nameRevision+'-backup', JSON.stringify(signsData));
+        const changes = {"w07-road-narrows-on-both-sides": {"previous": "Road narrows on both sides ahead", "exported": "Narrow road ahead", "name": "Narrow road ahead"}, "w10-quayside-or-river-bank": {"previous": "Quayside or river bank ahead", "exported": "River bank without barrier ahead", "name": "River bank without barrier ahead"}, "w12-road-hump": {"previous": "Road hump ahead", "exported": "Road bump ahead", "name": "Road bump ahead"}, "w13a-dip-in-road": {"previous": "Dip in road ahead", "exported": "Severe dip ahead ahead", "name": "Severe dip ahead"}, "w13b-ford": {"previous": "Ford ahead", "exported": "River bed crossing ahead", "name": "River bed crossing ahead"}, "w20-cattle": {"previous": "Cattle ahead", "exported": "Cattle crossing ahead", "name": "Cattle crossing ahead"}, "w21-wild-animals": {"previous": "Wild animals ahead", "exported": "Wild animals crossing ahead", "name": "Wild animals crossing ahead"}, "w26-other-danger": {"previous": "Other danger ahead", "exported": "Hazard ahead", "name": "Hazard ahead"}, "w28a-junction-ahead-with-priority": {"previous": "Junction with minor roads on both sides ahead", "exported": "Junction with minor road joining from both sides ahead", "name": "Junction with minor road joining from both sides ahead"}, "w28b-side-road-on-right": {"previous": "Junction with a minor road joining from the right ahead", "exported": "Junction with minor road joining from the right ahead", "name": "Junction with minor road joining from the right ahead"}, "w29-merging-traffic-from-left": {"previous": "Junction with an accelerating lane from the right ahead", "exported": "Junction with accelerating road joining from the right ahead", "name": "Junction with accelerating road joining from the right ahead"}, "w31-level-crossing-with-gate": {"previous": "Level crossing with gate ahead", "exported": "Railway crossing with barrier ahead", "name": "Railway crossing with barrier ahead"}, "w32-level-crossing-without-gate": {"previous": "Level crossing without gate ahead", "exported": "Railway crossing without barrier ahead", "name": "Railway crossing without barrier ahead"}, "m02-ahead-only": {"previous": "Compulsory ahead only", "exported": "Compulsory straight ", "name": "Compulsory straight"}, "m03-turn-right-ahead": {"previous": "Compulsory turn right ahead", "exported": "Compulsory turn right ", "name": "Compulsory turn right"}, "m04-ahead-or-right": {"previous": "Compulsory ahead or right", "exported": "Compulsory straight or right", "name": "Compulsory straight or right"}, "p02-no-vehicles": {"previous": "No vehicles", "exported": "Road closed", "name": "Road closed"}, "p14-maximum-height-3-5-m": {"previous": "Maximum height 3.5 m", "exported": "Maximum height", "name": "Maximum height"}, "p15-maximum-gross-weight-5-t": {"previous": "Maximum gross weight 5 t", "exported": "Maximum weight", "name": "Maximum weight"}, "p16-maximum-axle-weight-2-t": {"previous": "Maximum axle weight 2 t", "exported": "Maximum weight per axle", "name": "Maximum weight per axle"}, "p17-maximum-vehicle-length-10-m": {"previous": "Maximum vehicle length 10 m", "exported": "Maximum vehicle length", "name": "Maximum vehicle length"}, "p18-minimum-following-distance-70-m": {"previous": "Minimum following distance 70 m", "exported": "Minimum following distance on a highway", "name": "Minimum following distance on a highway"}, "p22-no-overtaking": {"previous": "No overtaking", "exported": "No overtaking for saloon cars", "name": "No overtaking for saloon cars"}, "p23-no-overtaking-by-goods-vehicles": {"previous": "No overtaking by goods vehicles", "exported": "No overtaking for commercial vehicles", "name": "No overtaking for commercial vehicles"}, "p24-maximum-speed-50": {"previous": "Maximum speed 50", "exported": "Maximum speed", "name": "Maximum speed"}, "p25-no-sounding-horn": {"previous": "No sounding horn", "exported": "No hooting", "name": "No hooting"}, "p27-give-priority-to-oncoming-traffic": {"previous": "Give priority to oncoming traffic", "exported": "Give priority for oncoming traffic", "name": "Give priority for oncoming traffic"}, "p28-end-of-restrictions": {"previous": "End of restrictions", "exported": "End of prohibitions", "name": "End of prohibitions"}, "p32-no-parking-zone": {"previous": "No parking zone", "exported": "Controlled parking zone", "name": "Controlled parking zone"}, "i03-pedestrian-crossing-information": {"previous": "Pedestrian crossing information", "exported": "Pedestrain crossing on the spot", "name": "Pedestrian crossing on the spot"}, "i16-first-aid": {"previous": "First aid", "exported": "First aid service", "name": "First aid service"}, "i17-telephone": {"previous": "Telephone", "exported": "Telephone service", "name": "Telephone service"}, "i19-accommodation": {"previous": "Accommodation", "exported": "Motel or hotel", "name": "Motel or hotel"}, "i23-walking-route": {"previous": "Walking route", "exported": "Pedestrain footpath", "name": "Pedestrian footpath"}, "d01-taveta-a23-advance-direction": {"previous": "Taveta A23 advance direction", "exported": "Advanced road direction for trunk road.", "name": "Advanced road direction for trunk road."}, "d02-eldoret-a104-and-njoro-c56": {"previous": "Eldoret A104 and Njoro C56", "exported": "Advanced road direction for trunk road.", "name": "Advanced road direction for trunk road."}, "d03-nakuru-elementaita-and-ol-kalou": {"previous": "Nakuru Elementaita and Ol Kalou", "exported": "Advanced road direction for trunk road.", "name": "Advanced road direction for trunk road."}, "d04-nakuru-and-thika-roundabout": {"previous": "Nakuru and Thika roundabout", "exported": "Advanced road direction for round about road.", "name": "Advanced road direction for round about road."}, "d05-garissa-a3-roundabout": {"previous": "Garissa A3 roundabout", "exported": "Advanced road direction for slip road.", "name": "Advanced road direction for slip road."}, "d06-kitale-kongoni-and-kipsain": {"previous": "Kitale Kongoni and Kipsain", "exported": "Advanced road direction for non-trunk road.", "name": "Advanced road direction for non-trunk road."}, "d07-bungoma-eldoret-and-malaba": {"previous": "Bungoma Eldoret and Malaba", "exported": "Advanced road direction for non-trunk road.", "name": "Advanced road direction for non-trunk road."}, "d08-kongoni-d323-junction": {"previous": "Kongoni D323 junction", "exported": "Advanced road direction for non-trunk road.", "name": "Advanced road direction for non-trunk road."}, "d09-nanyuki-and-nyeri-direction": {"previous": "Nanyuki and Nyeri direction", "exported": "Advanced road direction for non-trunk road.", "name": "Advanced road direction for non-trunk road."}, "d10-malindi-b8-direction": {"previous": "Malindi B8 direction", "exported": "Advanced road direction for non-trunk road.", "name": "Advanced road direction for non-trunk road."}, "d11-ainabkoi-c56-direction": {"previous": "Ainabkoi C56 direction", "exported": "Advanced road direction for non-trunk road.", "name": "Advanced road direction for non-trunk road."}, "d12-kaiboi-40-km-c37-direction": {"previous": "Kaiboi 40 km C37 direction", "exported": "Advanced road direction for non-trunk road.", "name": "Advanced road direction for non-trunk road."}, "d13-kitale-kongoni-and-kipsain-route-list": {"previous": "Kitale Kongoni and Kipsain route list", "exported": "Route confirmatory road", "name": "Route confirmatory road"}, "d14-sagana-nyeri-and-nanyuki-distances": {"previous": "Sagana Nyeri and Nanyuki distances", "exported": "Route confirmatory road", "name": "Route confirmatory road"}, "d15-a3-route-marker": {"previous": "A3 route marker", "exported": "Route confirmatory road", "name": "Route confirmatory road"}, "d16-r-route-marker-green": {"previous": "R route marker green", "exported": "Route confirmatory road", "name": "Route confirmatory road"}, "d17-c33-myanga-and-mungatsi-distances": {"previous": "C33 Myanga and Mungatsi distances", "exported": "Route confirmatory road", "name": "Route confirmatory road"}, "d18-c60-route-marker": {"previous": "C60 route marker", "exported": "Route confirmatory road", "name": "Route confirmatory road"}, "d19-r-route-marker-white": {"previous": "R route marker white", "exported": "Route confirmatory road", "name": "Route confirmatory road"}, "d20-eld50-location-marker": {"previous": "ELD50 location marker", "exported": "Miscellanous", "name": "Miscellaneous"}, "d21-airport-2-direction": {"previous": "Airport 2 direction", "exported": "Airport 2 to the left", "name": "Airport 2 to the left"}, "d22-nairobi-hospital-direction": {"previous": "Nairobi Hospital direction", "exported": "Nairobi Hospital to the right", "name": "Nairobi Hospital to the right"}, "d23-free-car-park-direction": {"previous": "Free car park direction", "exported": "Free car park to the right", "name": "Free car park to the right"}, "d24-toilets-direction": {"previous": "Toilets direction", "exported": "Toilets to the left", "name": "Toilets to the left"}, "d25-mombasa-place-name": {"previous": "Mombasa place name", "exported": "Place identification", "name": "Place identification"}, "s01-mbagathi-ridge-street-name": {"previous": "Mbagathi Ridge street name", "exported": "Street Name", "name": "Street Name"}, "s02-moi-avenue-street-name": {"previous": "Moi Avenue street name", "exported": "Street Name", "name": "Street Name"}, "s03-kindaruma-lane-street-name": {"previous": "Kindaruma Lane street name", "exported": "Street Name", "name": "Street Name"}, "w33-single-track-railway-crossing": {"previous": "Single track railway crossing ahead", "exported": "Single track railway crossing", "name": "Single track railway crossing"}, "w34-multiple-track-railway-crossing": {"previous": "Multiple track railway crossing ahead", "exported": "Multi line track railway crossing", "name": "Multi line track railway crossing"}, "s04-red-and-white-hazard-marker": {"previous": "Red and white hazard marker", "exported": "Chevron", "name": "Chevron"}, "w35a-chevron-alignment-left": {"previous": "Chevron alignment left", "exported": "Extreme turn to the left", "name": "Extreme turn to the left"}, "w35b-chevron-alignment-right": {"previous": "Chevron alignment right", "exported": "Extreme turn to the right", "name": "Extreme turn to the right"}, "w36-hazard-marker-upward-chevrons": {"previous": "Hazard marker upward chevrons", "exported": "Exit from the main road", "name": "Exit from the main road"}, "w37-hazard-marker-diagonal-stripes": {"previous": "Hazard marker diagonal stripes", "exported": "Hazard demarcation", "name": "Hazard demarcation"}};
+        signsData.forEach(s => { const c=changes[s.id]; if(c && (s.name===c.previous || s.name===c.exported)) s.name=c.name; });
+        if(saved) saveData();
+        localStorage.setItem(nameRevision,'1');
+      }
+      document.getElementById('totalCount').innerText = `${signsData.length} Signs`;
+      renderPills();
+      render();
+    } catch (e) {
+      console.error("Failed to load metadata", e);
+    }
+  }
+
+  function saveData() {
+    localStorage.setItem('drivetest_signs_metadata_v2', JSON.stringify(signsData));
+  }
+
+  function renderPills() {
+    const counts = { all: signsData.length };
+    signsData.forEach(s => {
+      counts[s.category] = (counts[s.category] || 0) + 1;
+    });
+
+    const categoryOrder = ['all', 'warning', 'regulatory', 'mandatory', 'information', 'direction', 'hazard_markers', 'supplementary', 'priority', 'prohibitory', 'controls'];
+    const labelMap = {
+      all: 'All',
+      warning: 'Warning',
+      regulatory: 'Regulatory',
+      mandatory: 'Mandatory',
+      information: 'Information',
+      direction: 'Direction',
+      hazard_markers: 'Hazard Markers',
+      supplementary: 'Supplementary',
+      priority: 'Priority',
+      prohibitory: 'Prohibitory',
+      controls: 'Controls'
+    };
+
+    const pillsContainer = document.getElementById('categoryPills');
+    const availableCats = ['all', ...Object.keys(counts).filter(c => c !== 'all' && counts[c] > 0)];
+    availableCats.sort((a, b) => {
+      let ia = categoryOrder.indexOf(a);
+      let ib = categoryOrder.indexOf(b);
+      if (ia === -1) ia = 99;
+      if (ib === -1) ib = 99;
+      return ia - ib;
+    });
+
+    pillsContainer.innerHTML = availableCats.map(cat => `
+      <div class="pill ${currentFilterCat === cat ? 'active' : ''}" data-cat="${cat}">
+        ${labelMap[cat] || cat} (${counts[cat] || 0})
+      </div>
+    `).join('');
+
+    pillsContainer.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        pillsContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentFilterCat = pill.dataset.cat;
+        render();
+      });
+    });
+  }
+
+  function getDisplayImg(sign) {
+    if (viewMode === 'png' && sign.png_path) return sign.png_path;
+    return sign.svg_path || sign.png_path;
+  }
+
+  function render() {
+    const grid = document.getElementById('signsGrid');
+    grid.innerHTML = '';
+
+    const filtered = signsData.filter(s => {
+      const matchCat = currentFilterCat === 'all' || s.category === currentFilterCat;
+      const q = currentSearch.toLowerCase();
+      const matchSearch = !q || s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q) || s.meaning.toLowerCase().includes(q);
+      const matchVerified = !showVerifiedOnly || s.verified;
+      return matchCat && matchSearch && matchVerified;
+    });
+
+    const verifiedCount = signsData.filter(s => s.verified).length;
+    document.getElementById('statsText').innerText = `${verifiedCount} / ${signsData.length} verified`;
+
+    filtered.forEach(sign => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-img-wrap">
+          <span class="cat-badge cat-${sign.category}">${sign.category}</span>
+          <span class="code-tag">${sign.code}</span>
+          <img src="${getDisplayImg(sign)}" alt="${sign.name}" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-title">${sign.name}</div>
+          <div class="card-desc">${sign.meaning}</div>
+          <div class="card-footer">
+            <span class="verified-chip">${sign.verified ? '✓ Verified' : ''}</span>
+            <button onclick="openEditModal('${sign.id}')">Edit</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  window.openEditModal = function(id) {
+    const sign = signsData.find(s => s.id === id);
+    if (!sign) return;
+    editingSignId = id;
+
+    document.getElementById('modalTitle').innerText = sign.name;
+    document.getElementById('modalPreviewImg').src = getDisplayImg(sign);
+    document.getElementById('modalCode').value = sign.code;
+    document.getElementById('modalName').value = sign.name;
+    document.getElementById('modalCategory').value = sign.category;
+    document.getElementById('modalMeaning').value = sign.meaning;
+    document.getElementById('modalQuestion').value = sign.quiz_question || '';
+    document.getElementById('modalAnswer').value = sign.quiz_answer || '';
+    document.getElementById('modalVerified').checked = !!sign.verified;
+
+    document.getElementById('editModal').classList.add('open');
+  };
+
+  document.getElementById('btnCloseModal').addEventListener('click', () => {
+    document.getElementById('editModal').classList.remove('open');
+  });
+
+  document.getElementById('btnSaveModal').addEventListener('click', () => {
+    const sign = signsData.find(s => s.id === editingSignId);
+    if (!sign) return;
+
+    sign.code = document.getElementById('modalCode').value;
+    sign.name = document.getElementById('modalName').value;
+    sign.category = document.getElementById('modalCategory').value;
+    sign.meaning = document.getElementById('modalMeaning').value;
+    sign.quiz_question = document.getElementById('modalQuestion').value;
+    sign.quiz_answer = document.getElementById('modalAnswer').value;
+    sign.verified = document.getElementById('modalVerified').checked;
+
+    saveData();
+    render();
+    document.getElementById('editModal').classList.remove('open');
+  });
+
+  document.getElementById('modalFileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const sign = signsData.find(s => s.id === editingSignId);
+        if (sign) {
+          if (file.name.endsWith('.svg')) {
+            sign.svg_path = evt.target.result;
+          } else {
+            sign.png_path = evt.target.result;
+          }
+          document.getElementById('modalPreviewImg').src = evt.target.result;
+          saveData();
+          render();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  document.getElementById('viewMode').addEventListener('change', (e) => {
+    viewMode = e.target.value;
+    render();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    currentSearch = e.target.value;
+    render();
+  });
+
+  document.getElementById('filterVerifiedOnly').addEventListener('change', (e) => {
+    showVerifiedOnly = e.target.checked;
+    render();
+  });
+
+  document.getElementById('btnResetData').addEventListener('click', async () => {
+    if (confirm("Reset all labels and metadata to the official 147 vector signs defaults?")) {
+      localStorage.removeItem('drivetest_signs_metadata');
+      localStorage.removeItem('drivetest_signs_metadata_v2');
+      const resp = await fetch('signs_metadata.json');
+      signsData = await resp.json();
+      saveData();
+      renderPills();
+      render();
+    }
+  });
+
+  // Import JSON
+  document.getElementById('btnImportJson').addEventListener('click', () => {
+    document.getElementById('importJsonFileInput').click();
+  });
+
+  document.getElementById('importJsonFileInput').addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      const imported = JSON.parse(await file.text());
+      if (!Array.isArray(imported)) throw new Error('Expected an exported JSON array of signs.');
+      let count = 0;
+      imported.forEach(item => {
+        const sign = signsData.find(s => s.id === item.id);
+        if (sign) {
+          const newName = item.label || item.name;
+          if (newName) {
+            sign.name = newName;
+            count++;
+          }
+          if (item.category) sign.category = item.category;
+          if (item.code) sign.code = item.code;
+          if (item.meaning) sign.meaning = item.meaning;
+          if (item.quiz_question) sign.quiz_question = item.quiz_question;
+          if (item.quiz_answer) sign.quiz_answer = item.quiz_answer;
+          if (item.notes) sign.notes = item.notes;
+        }
+      });
+      saveData();
+      renderPills();
+      render();
+      alert(`Successfully imported and updated ${count} signs from ${file.name}`);
+    } catch (e) {
+      alert('Import failed: ' + e.message);
+    } finally {
+      event.target.value = '';
+    }
+  });
+
+  // Export JSON
+  document.getElementById('btnExportJson').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(signsData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'signs_metadata_export.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Export CSV
+  document.getElementById('btnExportCsv').addEventListener('click', () => {
+    const headers = ["ID", "Code", "Name", "Category", "Meaning", "PNG Path", "SVG Path", "Quiz Question", "Quiz Answer", "Verified"];
+    const rows = signsData.map(s => [
+      `"${s.id}"`, `"${s.code}"`, `"${s.name}"`, `"${s.category}"`,
+      `"${(s.meaning||'').replace(/"/g, '""')}"`,
+      `"${s.png_path}"`, `"${s.svg_path}"`,
+      `"${(s.quiz_question||'').replace(/"/g, '""')}"`,
+      `"${(s.quiz_answer||'').replace(/"/g, '""')}"`,
+      s.verified ? "true" : "false"
+    ]);
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'signs_labels_export.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Export JS Quiz Data
+  document.getElementById('btnExportJs').addEventListener('click', () => {
+    const jsContent = 'export const ROAD_SIGNS = ' + JSON.stringify(signsData, null, 2) + ';\n';
+    const blob = new Blob([jsContent], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'signs_data.js';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  loadData();
+</script>
+
+</body>
+</html>

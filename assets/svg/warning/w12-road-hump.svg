@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Road bump ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><path d="M27 152 H57 Q100 102 143 152 H173 V162 H27 Z" fill="#17212b"/></g>
+</svg>

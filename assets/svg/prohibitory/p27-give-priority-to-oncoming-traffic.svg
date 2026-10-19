@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Give priority for oncoming traffic</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<circle cx="100" cy="100" r="91" fill="#c5243d"/><circle cx="100" cy="100" r="74" fill="white"/><g transform="translate(13 30) scale(.66)"><path d="M88 156 V78 H64 L100 39 L136 78 H112 V156 Z" fill="#c5243d"/></g><g transform="translate(76 30) scale(.66) rotate(180 100 100)"><path d="M88 156 V78 H64 L100 39 L136 78 H112 V156 Z" fill="#17212b"/></g>
+</svg>

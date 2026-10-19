@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Railway crossing with barrier ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><g transform="translate(5 18) scale(.95)"><rect x="38" y="100" width="124" height="9" rx="0" fill="#17212b"/><rect x="38" y="125" width="124" height="8" rx="0" fill="#17212b"/><path d="M47 145 V91 L52 82 L57 91 V145 Z" fill="#17212b"/><path d="M67 145 V91 L72 82 L77 91 V145 Z" fill="#17212b"/><path d="M87 145 V91 L92 82 L97 91 V145 Z" fill="#17212b"/><path d="M107 145 V91 L112 82 L117 91 V145 Z" fill="#17212b"/><path d="M127 145 V91 L132 82 L137 91 V145 Z" fill="#17212b"/><path d="M147 145 V91 L152 82 L157 91 V145 Z" fill="#17212b"/></g></g>
+</svg>

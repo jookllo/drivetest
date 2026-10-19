@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">No motor cars</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<circle cx="100" cy="100" r="91" fill="#c5243d"/><circle cx="100" cy="100" r="74" fill="white"/><g transform="translate(17 17) scale(.83)"><path d="M48 111 L58 80 Q61 72 71 72 H130 Q140 72 143 80 L153 111 V144 H139 V132 H62 V144 H48 Z" fill="#17212b"/><path d="M64 106 L72 84 H129 L137 106 Z" fill="white"/><rect x="61" y="115" width="20" height="9" rx="3" fill="white"/><rect x="121" y="115" width="20" height="9" rx="3" fill="white"/></g><path d="M43 39 L158 162" fill="none" stroke="#c5243d" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

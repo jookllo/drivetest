@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Low flying aircraft ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><g transform="translate(20 24) scale(.8) rotate(-35 100 100)"><path d="M94 28 H106 L110 81 L165 111 V124 L109 107 L107 148 L128 161 V172 L100 163 L72 172 V161 L93 148 L91 107 L35 124 V111 L90 81 Z" fill="#17212b"/></g></g>
+</svg>

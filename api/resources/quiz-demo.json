@@ -1,0 +1,120 @@
+[
+  {
+    "type": "single",
+    "prompt": "What is this sign?",
+    "options": [
+      {
+        "id": "0",
+        "label": "Junction ahead",
+        "image": null
+      },
+      {
+        "id": "1",
+        "label": "Roundabout ahead",
+        "image": null
+      },
+      {
+        "id": "2",
+        "label": "Road narrows ahead",
+        "image": null
+      },
+      {
+        "id": "3",
+        "label": "No entry",
+        "image": null
+      }
+    ],
+    "correctIds": [
+      "0"
+    ],
+    "explanation": "The X symbol is the junction-ahead sign in your catalog.",
+    "sign": {
+      "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InRpdGxlIGRlc2MiPgo8dGl0bGUgaWQ9InRpdGxlIj5KdW5jdGlvbiBhaGVhZDwvdGl0bGU+CjxkZXNjIGlkPSJkZXNjIj5SZWRyYXduIGZyb20gSU1HLTIwMjYxMDE0LVdBMDA5MS5qcGcuIFgtc2hhcGVkIGp1bmN0aW9uIHN5bWJvbCBjb3JyZWN0ZWQgdG8gdGhlIHVzZXIgc2tldGNoIG9uIDIwMjYtMTAtMTcuPC9kZXNjPgo8cGF0aCBkPSJNMTAwIDE2IEwxOTAgMTc5IEgxMCBaIiBmaWxsPSIjYzUyNDNkIiBzdHJva2U9IiNjNTI0M2QiIHN0cm9rZS13aWR0aD0iOSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTEwMCAzOSBMMTcyIDE2OCBIMjggWiIgZmlsbD0id2hpdGUiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNiA1MSkgc2NhbGUoLjY0KSI+PHBhdGggZD0iTTY0IDg0IEwxMzYgMTU2IE0xMzYgODQgTDY0IDE1NiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTcyMTJiIiBzdHJva2Utd2lkdGg9IjE2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L2c+Cjwvc3ZnPgo="
+    }
+  },
+  {
+    "type": "single",
+    "prompt": "Which class contains warning signs?",
+    "options": [
+      {
+        "id": "0",
+        "label": "Class A \u2014 Regulatory signs",
+        "image": null
+      },
+      {
+        "id": "1",
+        "label": "Class B \u2014 Warning signs",
+        "image": null
+      },
+      {
+        "id": "2",
+        "label": "Class C \u2014 Informatory signs",
+        "image": null
+      }
+    ],
+    "correctIds": [
+      "1"
+    ],
+    "explanation": "Warning signs belong to Class B in this project.",
+    "sign": null
+  },
+  {
+    "type": "single",
+    "prompt": "Which regulatory subcategory contains Stop and Give way?",
+    "options": [
+      {
+        "id": "0",
+        "label": "Compulsory",
+        "image": null
+      },
+      {
+        "id": "1",
+        "label": "Prohibitory",
+        "image": null
+      },
+      {
+        "id": "2",
+        "label": "Priority",
+        "image": null
+      }
+    ],
+    "correctIds": [
+      "2"
+    ],
+    "explanation": "Stop and Give way are priority signs.",
+    "sign": null
+  },
+  {
+    "type": "multi",
+    "prompt": "Which are Class A subcategories? Select all that apply.",
+    "options": [
+      {
+        "id": "0",
+        "label": "Priority",
+        "image": null
+      },
+      {
+        "id": "1",
+        "label": "Facility",
+        "image": null
+      },
+      {
+        "id": "2",
+        "label": "Compulsory",
+        "image": null
+      },
+      {
+        "id": "3",
+        "label": "Prohibitory",
+        "image": null
+      }
+    ],
+    "correctIds": [
+      "0",
+      "2",
+      "3"
+    ],
+    "explanation": "Class A contains priority, prohibitory and compulsory signs. All correct choices and no extra choices are required for one point.",
+    "sign": null
+  }
+]

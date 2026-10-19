@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Direction both ways</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="7" y="37" width="186" height="126" rx="3" fill="white"/><path d="M7 37 H193 V163 H7 Z" fill="none" stroke="#17212b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(20 20) scale(.8)"><g transform="translate(0 20) scale(.8) rotate(-90 100 100)"><path d="M88 156 V78 H64 L100 39 L136 78 H112 V156 Z" fill="#17212b"/></g><g transform="translate(40 20) scale(.8) rotate(90 100 100)"><path d="M88 156 V78 H64 L100 39 L136 78 H112 V156 Z" fill="#17212b"/></g></g>
+</svg>

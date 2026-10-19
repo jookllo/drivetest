@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="150" viewBox="0 0 320 150" role="img" aria-labelledby="title desc">
+<title id="title">Advanced road direction for non-trunk road.</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="2" y="2" width="316" height="146" rx="12" fill="white"/><rect x="6" y="6" width="308" height="138" rx="10" fill="#187a57"/><rect x="12" y="12" width="296" height="126" rx="7" fill="none" stroke="white" stroke-width="2"/><text x="170" y="70" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="white">Malindi</text><text x="170" y="112" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#f3d56b">B 8</text><g transform="translate(3 8) scale(.65) rotate(-35 100 100)"><path d="M88 156 V78 H64 L100 39 L136 78 H112 V156 Z" fill="white"/></g>
+</svg>

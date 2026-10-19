@@ -1,0 +1,46 @@
+# Local credentials and environment configuration
+.env
+.env.*
+!.env.example
+auth.json
+*.pem
+*.key
+
+# Installed dependencies (keep api/public/vendor: the quiz uses bundled Vue)
+/api/vendor/
+node_modules/
+
+# Local tooling, caches, and operating-system files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.phpunit.cache/
+.phpunit.result.cache
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.codex/
+.cursor/
+*.log
+*.swp
+*.swo
+*~
+
+# Local data, backups, and reproducible export packages
+*.sqlite
+*.sqlite3
+*.sql
+*.sql.gz
+*.bak
+*.tmp
+/signs/backups/
+/signs/road-signs-svg.zip
+/tmp/
+
+# Laravel runtime files are also covered by api/ and storage .gitignore files
+/api/public/build/
+/api/public/hot
+/api/public/storage

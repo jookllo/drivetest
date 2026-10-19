@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Compulsory u turn arrow</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Separate blue U-turn sign to the right of the poster; verify its intended use.</desc>
+<circle cx="100" cy="100" r="91" fill="#086ba8"/><circle cx="100" cy="100" r="87" fill="none" stroke="white" stroke-width="2"/><path d="M49 152 V78 A43 43 0 0 1 86 35 A43 43 0 0 1 135 78 V112 H157 L123 151 L89 112 H111 V78 A19 19 0 0 0 73 78 V152 Z" fill="white"/>
+</svg>

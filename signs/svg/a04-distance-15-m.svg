@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Distance 15 m</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="7" y="37" width="186" height="126" rx="3" fill="white"/><path d="M7 37 H193 V163 H7 Z" fill="none" stroke="#17212b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(20 20) scale(.8)"><text x="100" y="83" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700" fill="#17212b">15m</text><path d="M44 124 H156" fill="none" stroke="#17212b" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M35 124 L55 110 V138 Z M165 124 L145 110 V138 Z" fill="#17212b"/></g>
+</svg>

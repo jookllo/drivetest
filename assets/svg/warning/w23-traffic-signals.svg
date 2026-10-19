@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Traffic signals ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><rect x="82" y="60" width="36" height="96" rx="8" fill="#17212b"/><circle cx="100" cy="78" r="12" fill="#c5243d"/><circle cx="100" cy="108" r="12" fill="#e5ab23"/><circle cx="100" cy="138" r="12" fill="#187a57"/></g>
+</svg>

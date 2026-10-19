@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200" role="img" aria-labelledby="title desc">
+<title id="title">Advanced road direction for slip road.</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<rect x="2" y="2" width="316" height="196" rx="12" fill="white"/><rect x="6" y="6" width="308" height="188" rx="10" fill="#187a57"/><rect x="12" y="12" width="296" height="176" rx="7" fill="none" stroke="white" stroke-width="2"/><circle cx="140" cy="92" r="30" fill="none" stroke="white" stroke-width="12"/><path d="M111 85 H51 V99 H111 M133 122 V175 H147 V122 M170 85 H229 V99 H170 M119 67 V34 H131 V63 M140 62 V34 H152 V64 M160 69 V34 H172 V77 Z" fill="white"/><text x="239" y="144" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="white">Garissa</text><text x="239" y="173" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#f3d56b">A 3</text>
+</svg>

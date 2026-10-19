@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="140" viewBox="0 0 320 140" role="img" aria-labelledby="title desc">
+<title id="title">Advanced road direction for non-trunk road.</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. The small direction arrow and place spelling should be checked against the original sign.</desc>
+<path d="M53 9 H311 V131 H53 L10 70 Z" fill="white" stroke="#17212b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M66 26 L35 70 L66 114" fill="none" stroke="#17212b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><text x="185" y="58" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#17212b">Kaiboi 40 km</text><text x="185" y="94" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#17212b">C 37</text>
+</svg>

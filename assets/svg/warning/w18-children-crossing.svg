@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Children crossing ahead</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. Photo-derived artwork; verify against the applicable road-sign standard before instructional use.</desc>
+<path d="M100 16 L190 179 H10 Z" fill="#c5243d" stroke="#c5243d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 39 L172 168 H28 Z" fill="white"/><g transform="translate(36 51) scale(.64)"><g transform="translate(1 17) scale(.76)"><circle cx="105" cy="49" r="11" fill="#17212b"/><path d="M101 67 L88 104 L114 127 L122 155 M89 103 L68 149 M99 75 L124 96 L141 96 M97 75 L78 84 L66 105" fill="none" stroke="#17212b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(78 47) scale(.58)"><circle cx="105" cy="49" r="11" fill="#17212b"/><path d="M101 67 L88 104 L114 127 L122 155 M89 103 L68 149 M99 75 L124 96 L141 96 M97 75 L78 84 L66 105" fill="none" stroke="#17212b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+</svg>

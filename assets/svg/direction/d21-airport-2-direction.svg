@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="140" viewBox="0 0 320 140" role="img" aria-labelledby="title desc">
+<title id="title">Airport 2 to the left</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0092.jpg. The numeral 2 is visible; the unit is not shown. Aircraft pictogram included separately below.</desc>
+<path d="M53 9 H311 V131 H53 L10 70 Z" fill="white" stroke="#17212b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M66 26 L35 70 L66 114" fill="none" stroke="#17212b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><text x="185" y="79" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#17212b">Airport 2</text>
+<g transform="translate(250 43) scale(.25) rotate(-90 100 100)"><path d="M94 28 H106 L110 81 L165 111 V124 L109 107 L107 148 L128 161 V172 L100 163 L72 172 V161 L93 148 L91 107 L35 124 V111 L90 81 Z" fill="#17212b"/></g></svg>

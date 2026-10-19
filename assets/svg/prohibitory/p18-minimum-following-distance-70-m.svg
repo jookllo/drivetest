@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+<title id="title">Minimum following distance on a highway</title>
+<desc id="desc">Redrawn from IMG-20261014-WA0091.jpg. The photographed sign shows 70 m; verify the official label and vehicle silhouettes.</desc>
+<circle cx="100" cy="100" r="91" fill="#c5243d"/><circle cx="100" cy="100" r="74" fill="white"/><text x="100" y="96" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="700" fill="#17212b">70m</text><g transform="translate(14 68) scale(.46)"><path d="M31 109 H52 L70 86 H121 L142 107 H163 V132 H31 Z" fill="#17212b"/><path d="M64 107 L77 94 H112 L126 107 Z" fill="white"/><circle cx="64" cy="134" r="13" fill="#17212b"/><circle cx="137" cy="134" r="13" fill="#17212b"/></g><g transform="translate(93 68) scale(.46)"><path d="M31 109 H52 L70 86 H121 L142 107 H163 V132 H31 Z" fill="#17212b"/><path d="M64 107 L77 94 H112 L126 107 Z" fill="white"/><circle cx="64" cy="134" r="13" fill="#17212b"/><circle cx="137" cy="134" r="13" fill="#17212b"/></g>
+</svg>
