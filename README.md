@@ -509,9 +509,9 @@ Do not include a leaderboard in the initial scope unless requested. A public ran
 
 Verification on 19 October 2026: **31 PHP tests passed, 176 assertions**; Pint formatting completed; all three quiz JavaScript files parsed. Coverage includes guest ownership, answer-key disclosure, exact-set scoring, deadline boundaries, groups, snapshots, admin authorization, draft imports, publication conflicts, recovery and HTTPS behavior. This is not a full production or cross-browser certification. The production Dockerfile builds locally and the full disposable HTTP smoke test passes, including guest-session/private-artwork persistence after container restart. GitHub release checks are tracked below; Dokploy itself has not been verified.
 
-### In progress — release infrastructure (19 October 2026)
+### Release infrastructure status (19 October 2026)
 
-The active delivery is [PR #1](https://github.com/jookllo/drivetest/pull/1), from `codex/ci-deployment` into `master`. Work on the branch is not a production release. Use the PR's latest checks for live status; older failed runs remain in GitHub history.
+Infrastructure [PR #1](https://github.com/jookllo/drivetest/pull/1) merged into `master` as `ce1d18a605050b5fcf481cf3d46bf3c774683646` after all four push/PR checks passed. The [post-merge master workflow](https://github.com/jookllo/drivetest/actions/runs/39240853599) also succeeded. This verifies GitHub CI/image publishing, not the state of the Dokploy deployment. Older failed and cancelled runs remain in GitHub history.
 
 | Work | Status and evidence | Completion condition |
 | --- | --- | --- |
@@ -520,7 +520,7 @@ The active delivery is [PR #1](https://github.com/jookllo/drivetest/pull/1), fro
 | Proxy regression fix | Finished locally: original push/PR image jobs failed the same HTTPS assertion. Laravel's cacheable `config/trustedproxy.php` fixes wildcard parsing; regression tests cover IPs, CIDRs and untrusted senders | Latest GitHub run must pass before merge |
 | Container smoke tests | Finished locally: migrations, 144 draft sign imports, private assets, HTTPS, CSRF and guest-session restart checks pass. Restart logic re-reads the ephemeral Docker host port | Keep these checks required for every PR |
 | Protected release branch | Configured in GitHub: `master` requires PR, both checks, up-to-date base and administrator enforcement; force pushes/deletion are disabled | Keep required check names aligned with CI; repository auto-merge is enabled |
-| GHCR publishing | Implemented for successful `master` runs only | First post-merge run publishes a commit-tagged image |
+| GHCR publishing | Implemented for successful `master` runs only | First master run succeeded; verify selected tag when deploying |
 | Dokploy deployment | Dockerfile build type selected by owner; server-specific setup unverified | Complete sections 20 B–I and the P0 checks below |
 
 ### Finished versus ready to launch
@@ -1135,7 +1135,49 @@ Release sequence:
 6. If code deployment fails, return to the known-good image/commit only if it is compatible with the current schema. Image rollback does not undo database migrations. Use a forward fix or a coordinated DB/files restore for incompatible migrations; assess data written since the backup first.
 7. Confirm the scheduler, backup jobs and external monitoring still target the current service. Once this process is reliable, automate safe steps in CI/CD; a push is not automatically a tested production release.
 
-### J. Troubleshooting
+### J. Current domain and Bad Gateway diagnosis
+
+The owner supplied this domain on 19 October 2026:
+
+```text
+drivers-ntsa-signs-bywley-6dd85e-45-155-102-200.sslip.io
+```
+
+Set the application's runtime URL to:
+
+```dotenv
+APP_URL=https://drivers-ntsa-signs-bywley-6dd85e-45-155-102-200.sslip.io
+```
+
+The supplied Domains screenshot shows **Port: 3000**. This repository's Apache configuration listens on **80** (`Dockerfile` exposes 80). Routing to 3000 is a concrete configuration mismatch and a likely cause of the reported **502 Bad Gateway**. The screenshot alone does not prove the application container is healthy or identify its deployed commit.
+
+In the application's **Domains** tab, edit the existing domain:
+
+| Setting | Value |
+| --- | --- |
+| Host | The full hostname above, without `https://` |
+| Path | `/` |
+| Internal path | `/` |
+| Strip path | Off |
+| Container port | **80**, replacing 3000 |
+| HTTPS | On |
+| Certificate | `letsencrypt` |
+
+Save, then open `/up` and `/quiz` over HTTPS. For a Dokploy Application, domain changes hot-reload without a code rebuild; Docker Compose domain changes require redeployment. This field routes Traefik to the container, rather than exposing a new public host port. See [Dokploy domain routing](https://docs.dokploy.com/docs/core/domains).
+
+If 502 remains:
+
+1. Inspect **Deployments**: confirm a successful deployment of the intended `master` commit; a successful GitHub run is not a Dokploy deployment log.
+2. Inspect application runtime logs: confirm Apache started and the container stays running. The startup script deliberately exits when `APP_KEY` is missing. Supply the existing production key privately; do not rotate a working key during troubleshooting.
+3. Confirm Dockerfile path `Dockerfile`, context `.`, and no command override replacing the shipped Apache startup. Do not switch to `artisan serve` or set a Node-style `PORT=3000`.
+4. Confirm the service and Traefik share the expected internal network and Traefik targets the correct service on port 80. Check proxy logs for refused connections or missing services.
+5. If the result changes to a redirect loop, check the actual Traefik IP/CIDR in `TRUSTED_PROXIES`, then restart/redeploy to rebuild cached configuration. The proxy fix from PR #1 must be present. Keep HTTPS enforcement enabled.
+6. If the result changes to Laravel HTTP 500, inspect application logs and verify MySQL internal hostname, credentials, connectivity and migrations. A domain-port change does not create tables or content.
+7. If `/quiz` loads but reports no questions, routing is working; review and publish enough eligible questions and linked signs using section 14. Do not publish drafts just to suppress the empty state.
+
+A read-only HTTPS request to this domain’s `/quiz` returned HTTP 500 on 19 October 2026 after the screenshot was supplied. The reported 502 and the observed 500 are different failure states; application logs are needed to identify the current cause. The dashboard URL/access and live Dokploy deployment settings must be inspected before claiming the port is corrected or automatic deployment is active. Do not copy secrets, complete environment dumps, or webhook URLs into this document.
+
+### K. Troubleshooting reference
 
 | Symptom | Check / action |
 | --- | --- |
@@ -1188,7 +1230,7 @@ The `DriveTest CI` workflow runs on pull requests to `master`, pushes to `master
 - `PHP, MySQL and JavaScript checks`: validate Composer metadata, install locked dependencies, check PHP formatting and JavaScript syntax, then run the application tests on disposable MySQL 8.
 - `Production image and HTTP smoke tests`: build the production Dockerfile and run the disposable real-HTTP checks described in section 20.
 
-Configure GitHub branch protection for `master` to require a pull request, both successful checks, an up-to-date branch, and enforcement for administrators. Block force pushes and deletion. A solo-maintainer repository need not require another person's approval. These are repository settings, not settings that YAML can enforce. Enable repository auto-merge, then enable it on each reviewed PR to merge after requirements pass. New commits must pass again; failing checks must be fixed on the branch.
+GitHub branch protection is configured for `master` to require a pull request, both successful checks, an up-to-date branch, and enforcement for administrators. Block force pushes and deletion. A solo-maintainer repository need not require another person's approval. These are repository settings, not settings that YAML can enforce. Repository auto-merge is enabled; enable it on each reviewed PR to merge after requirements pass. New commits must pass again; failing checks must be fixed on the branch.
 
 ```bash
 git switch -c codex/describe-change
@@ -1198,6 +1240,43 @@ git commit -m "Describe the concrete change"
 git push -u origin codex/describe-change
 # Open a PR into master; review it and enable auto-merge.
 ```
+
+### What to do for every change
+
+1. **Start from current master.** Commit or safely preserve existing work, fetch `origin`, and create a new `codex/<change>` branch from `origin/master`. Do not keep adding unrelated changes to an already merged branch.
+2. **Implement and update this guide.** Application code belongs in `api/`; deployment code in the root `Dockerfile`, `.dockerignore`, `api/docker/` and `.github/workflows/ci.yml`; source artwork in `signs/svg/`. Record completed behavior, known limitations and remaining work in sections 1/12/20/21. Keep the established theme and mascot rules.
+3. **Verify locally.** Run relevant PHP tests against `drivetest_test`, Pint for PHP changes, and JavaScript syntax checks for changed scripts. Deployment/runtime changes also need a production Docker build and the disposable smoke test. Documentation-only edits need link/path/content review; GitHub still runs its normal checks.
+4. **Review and push only intended files.** Check `git diff` and `git status`; exclude secrets, database dumps and runtime files. Commit and push the development branch.
+5. **Open a PR into master.** Explain the problem, resulting behavior, validation and deployment implications. Both required checks must pass against the current base. Push fixes to the same open PR if anything fails. Old red runs do not mean the newest commit failed.
+6. **Enable auto-merge on the reviewed PR.** Use the private GitHub author email. Auto-merge waits for required checks; it is not enabled automatically for every new PR. No direct push or administrator bypass is part of this process.
+7. **Check the master run after merge.** This reruns validation and publishes a release image. Record the merge commit SHA and verify the publish step succeeded. A PR success cannot prove the later registry publish succeeded.
+8. **Deploy through the configured Dokploy source.** Follow the decision table below. Back up data before migrations, run forward migrations deliberately, preserve `APP_KEY` and the private SVG volume, and verify scheduler operation. Runtime environment changes require restart/redeployment to rebuild cached configuration.
+9. **Verify the live release.** Check deployment commit/image tag, HTTPS `/up`, `/quiz`, assets, a guest attempt/reload/result, and admin access. Use a reviewed content pool. Record the release outcome and keep a schema-compatible rollback image.
+
+```bash
+git fetch origin
+git switch -c codex/your-change origin/master
+# Implement, verify, and review the diff.
+git add <reviewed-files>
+git commit -m "Describe the change"
+git push -u origin codex/your-change
+# Create PR, inspect checks, enable auto-merge, then verify master CI and Dokploy.
+```
+
+### Does master automatically deploy to Dokploy?
+
+**The repository workflow currently does not call Dokploy.** It tests and publishes to GitHub Container Registry. Dokploy can independently react to a GitHub push if its integration/webhook and Auto Deploy setting are configured. Those external settings cannot be established by reading the workflow or the supplied domain screenshot.
+
+| Source / trigger | What happens after a master merge | What must be verified |
+| --- | --- | --- |
+| GitHub source, Auto Deploy enabled for `master` | Dokploy receives the event and builds the repository using its Dockerfile settings | Connected repository, branch, event delivery, watch paths and deployment log/commit |
+| GitHub source, Auto Deploy disabled | Code changes are on GitHub; live app stays on the previous release until Deploy is invoked | Deliberate manual deployment of the intended commit |
+| Docker image source | CI publishes an image; publication alone does not tell Dokploy to replace its running container | Selected immutable image tag, registry pull access and explicit deploy or separately configured trigger |
+| Future Actions-to-Dokploy deployment step | Could trigger deployment only after successful master validation/publishing | Not implemented; would need a private credential/webhook, failure handling and a tested migration/rollback policy |
+
+To audit automatic deployment in Dokploy, open the actual application and confirm the source repository is `jookllo/drivetest`, branch is `master`, build type is Dockerfile, context is repository root and file is `Dockerfile`. Inspect Auto Deploy and watch-path settings; watch paths must include all runtime inputs, not only `api/`. Check GitHub integration/webhook delivery if configured, then compare the most recent Dokploy deployment SHA and timestamp with the master merge. Treat a deployment as successful only when its build/runtime logs and live smoke checks agree. Do not expose webhook secrets when recording evidence.
+
+For the Git-source route, Auto Deploy may start immediately on the master push, before the post-merge CI run finishes. PR protection verifies the candidate beforehand, but it does not make Dokploy wait for the master image-publishing job. Use manual deployment of the successful immutable image if that stricter ordering is required; do not enable a new automatic production trigger without agreeing the release policy.
 
 ### Image publishing and Dokploy
 
