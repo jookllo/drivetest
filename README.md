@@ -507,7 +507,7 @@ Do not include a leaderboard in the initial scope unless requested. A public ran
 | Presentation | Existing Vue interface, shared palette, blanket results mascot, local-only four-question demo | Full mobile/accessibility and browser regression testing outstanding |
 | Documentation / Git | One main README, agent-only instructions, `.gitignore`, first commit pushed to GitHub `master` | Database contents, local secrets and runtime files are not in Git |
 
-Verification on 19 October 2026: **31 PHP tests passed, 176 assertions**; Pint formatting completed; all three quiz JavaScript files parsed. Coverage includes guest ownership, answer-key disclosure, exact-set scoring, deadline boundaries, groups, snapshots, admin authorization, draft imports, publication conflicts, recovery and HTTPS behavior. This is not a full production or cross-browser certification. The production Dockerfile builds locally. Deployment smoke verification and GitHub checks are tracked below; Dokploy itself has not been verified.
+Verification on 19 October 2026: **31 PHP tests passed, 176 assertions**; Pint formatting completed; all three quiz JavaScript files parsed. Coverage includes guest ownership, answer-key disclosure, exact-set scoring, deadline boundaries, groups, snapshots, admin authorization, draft imports, publication conflicts, recovery and HTTPS behavior. This is not a full production or cross-browser certification. The production Dockerfile builds locally and the full disposable HTTP smoke test passes, including guest-session/private-artwork persistence after container restart. GitHub release checks are tracked below; Dokploy itself has not been verified.
 
 ### In progress — release infrastructure (19 October 2026)
 
@@ -515,10 +515,10 @@ The active delivery is [PR #1](https://github.com/jookllo/drivetest/pull/1), fro
 
 | Work | Status and evidence | Completion condition |
 | --- | --- | --- |
-| Production build | Implemented in `Dockerfile`, `.dockerignore` and `api/docker/`; local image builds successfully | Latest image passes HTTP smoke checks and staging verification |
+| Production build | Finished and verified locally: pinned image builds; runtime HTTP smoke tests pass | Verify the same release in Dokploy staging before production |
 | Application CI | Implemented in `.github/workflows/ci.yml`; original push and PR application jobs passed | Every candidate must pass Composer, formatting, JavaScript and MySQL tests |
-| Proxy regression fix | Original push/PR image jobs failed the same HTTPS redirect assertion. Proxy parsing now uses Laravel's cacheable `config/trustedproxy.php`; new tests cover IPs, CIDRs, wildcard and untrusted senders | Updated image smoke tests pass with runtime config cached |
-| Container smoke tests | Implemented in `api/tests/Deployment/`; run against disposable DB/volume/network, including restart | Successful run on the latest PR commit |
+| Proxy regression fix | Finished locally: original push/PR image jobs failed the same HTTPS assertion. Laravel's cacheable `config/trustedproxy.php` fixes wildcard parsing; regression tests cover IPs, CIDRs and untrusted senders | Latest GitHub run must pass before merge |
+| Container smoke tests | Finished locally: migrations, 144 draft sign imports, private assets, HTTPS, CSRF and guest-session restart checks pass. Restart logic re-reads the ephemeral Docker host port | Keep these checks required for every PR |
 | Protected release branch | Configured in GitHub: `master` requires PR, both checks, up-to-date base and administrator enforcement; force pushes/deletion are disabled | Keep required check names aligned with CI; repository auto-merge is enabled |
 | GHCR publishing | Implemented for successful `master` runs only | First post-merge run publishes a commit-tagged image |
 | Dokploy deployment | Dockerfile build type selected by owner; server-specific setup unverified | Complete sections 20 B–I and the P0 checks below |
