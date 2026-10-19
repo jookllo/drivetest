@@ -507,13 +507,31 @@ Do not include a leaderboard in the initial scope unless requested. A public ran
 | Presentation | Existing Vue interface, shared palette, blanket results mascot, local-only four-question demo | Full mobile/accessibility and browser regression testing outstanding |
 | Documentation / Git | One main README, agent-only instructions, `.gitignore`, first commit pushed to GitHub `master` | Database contents, local secrets and runtime files are not in Git |
 
-Verification on 19 October 2026: **29 PHP tests passed, 168 assertions**; Pint formatting completed; all three quiz JavaScript files parsed. Coverage includes guest ownership, answer-key disclosure, exact-set scoring, deadline boundaries, groups, snapshots, admin authorization, draft imports, publication conflicts, recovery and HTTPS behavior. This is not a full production or cross-browser certification. The README-only deployment recipes below have not been built or exercised on Dokploy.
+Verification on 19 October 2026: **31 PHP tests passed, 176 assertions**; Pint formatting completed; all three quiz JavaScript files parsed. Coverage includes guest ownership, answer-key disclosure, exact-set scoring, deadline boundaries, groups, snapshots, admin authorization, draft imports, publication conflicts, recovery and HTTPS behavior. This is not a full production or cross-browser certification. The production Dockerfile builds locally. Deployment smoke verification and GitHub checks are tracked below; Dokploy itself has not been verified.
+
+### In progress — release infrastructure (19 October 2026)
+
+The active delivery is [PR #1](https://github.com/jookllo/drivetest/pull/1), from `codex/ci-deployment` into `master`. Work on the branch is not a production release. Use the PR's latest checks for live status; older failed runs remain in GitHub history.
+
+| Work | Status and evidence | Completion condition |
+| --- | --- | --- |
+| Production build | Implemented in `Dockerfile`, `.dockerignore` and `api/docker/`; local image builds successfully | Latest image passes HTTP smoke checks and staging verification |
+| Application CI | Implemented in `.github/workflows/ci.yml`; original push and PR application jobs passed | Every candidate must pass Composer, formatting, JavaScript and MySQL tests |
+| Proxy regression fix | Original push/PR image jobs failed the same HTTPS redirect assertion. Proxy parsing now uses Laravel's cacheable `config/trustedproxy.php`; new tests cover IPs, CIDRs, wildcard and untrusted senders | Updated image smoke tests pass with runtime config cached |
+| Container smoke tests | Implemented in `api/tests/Deployment/`; run against disposable DB/volume/network, including restart | Successful run on the latest PR commit |
+| Protected release branch | Configured in GitHub: `master` requires PR, both checks, up-to-date base and administrator enforcement; force pushes/deletion are disabled | Keep required check names aligned with CI; repository auto-merge is enabled |
+| GHCR publishing | Implemented for successful `master` runs only | First post-merge run publishes a commit-tagged image |
+| Dokploy deployment | Dockerfile build type selected by owner; server-specific setup unverified | Complete sections 20 B–I and the P0 checks below |
+
+### Finished versus ready to launch
+
+The catalog, guest quiz engine, editor, recovery commands and score sharing listed above are delivered source features. They do not imply a reviewed question bank or a working public deployment. The outstanding launch work is ordered below. Record verification evidence when moving an item to completed; do not mark infrastructure finished merely because its configuration file exists.
 
 ### P0 — before making the public quiz available
 
 | Work | Correct location / owner | Done when |
 | --- | --- | --- |
-| Production container | Repository root `Dockerfile`, `.dockerignore`; `api/docker/` runtime files described in section 20 | Staging image builds; only `api/public` is served; imports can read sibling `signs/` |
+| Production container staging validation | Repository root `Dockerfile`, `.dockerignore`; `api/docker/` runtime files described in section 20 | Staging image builds; only `api/public` is served; imports can read sibling `signs/` |
 | Dokploy environment | Dokploy application, MySQL, volume, domain and job settings | HTTPS, sessions, DB, artwork and scheduled expiry survive redeploy |
 | Content review | Owner in `/mdosimimi`; source SVGs in `signs/svg/` | Enough verified questions for every advertised topic, filter and length |
 | Question coverage | MySQL via editor or `questions:import` | Mixed default has at least 4 names, 2 classes, 2 subcategories, 2 general slots with valid uniqueness/groups; twice that for 20, and 10/20 for each offered focused topic |
@@ -1155,7 +1173,7 @@ These are proposals after the P0/P1 work in section 12, not current features or 
 | Analytics with minimal data | Completion/drop-off and difficult questions without exposing private histories | Aggregate events, consent/privacy/retention design |
 | Better sharing | Approved hands-on-cheeks asset and server-generated score cards without private data | `assets/mascot`, runtime derivatives, result rendering |
 | Localization and offline learning | Reviewed translations; cached practice with explicit offline score limitations | Question translations, UI strings and future mobile/PWA layer |
-| CI/CD and scale | Automated tests, image builds, staging checks, shared storage/cache, background workers when required | Repository CI and Dokploy services |
+| Deployment automation and scale | CI tests/image builds are implemented; staging promotion, shared storage/cache and background workers remain future work | Repository CI and Dokploy services |
 
 Do not introduce leaderboards or “exam certified” claims based on this public practice catalog. Users can consult the public sign names/classes. Anti-copying is not achieved by hiding a route or placing an API key in JavaScript; concentrate on editorial quality, authorization for writes and reasonable abuse controls.
 

@@ -71,6 +71,8 @@ python3 "$script_dir/smoke.py" "http://127.0.0.1:$port" "$state" initial
 # Config is rebuilt on restart; private volume and database sessions must survive.
 docker restart "$app" >/dev/null
 wait_for_app
+# Docker may assign a new ephemeral host port after restart.
+port=$(docker port "$app" 80/tcp | head -1 | cut -d: -f2)
 docker exec --user www-data "$app" test -s /app/api/storage/app/private/signs/r01-stop.svg
 python3 "$script_dir/smoke.py" "http://127.0.0.1:$port" "$state" restarted
 echo 'Production image smoke checks passed.'

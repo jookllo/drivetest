@@ -25,6 +25,28 @@ class QuizSecurityTest extends TestCase
         $this->get('https://localhost/quiz')->assertOk()->assertHeader('Strict-Transport-Security', 'max-age=31536000');
     }
 
+    public function test_forwarded_https_is_accepted_only_from_configured_proxies(): void
+    {
+        $this->app->instance('env', 'production');
+        config(['trustedproxy.proxies' => '192.0.2.10, 198.51.100.0/24']);
+
+        $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.10'])
+            ->get('http://localhost/quiz', ['X-Forwarded-Proto' => 'https'])
+            ->assertOk()->assertHeader('Strict-Transport-Security', 'max-age=31536000');
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.25'])
+            ->get('http://localhost/quiz', ['X-Forwarded-Proto' => 'https'])->assertOk();
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
+            ->get('http://localhost/quiz', ['X-Forwarded-Proto' => 'https'])->assertStatus(308);
+    }
+
+    public function test_explicit_wildcard_proxy_configuration_preserves_https_detection(): void
+    {
+        $this->app->instance('env', 'production');
+        config(['trustedproxy.proxies' => '*']);
+        $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.10'])
+            ->get('http://localhost/quiz', ['X-Forwarded-Proto' => 'https'])->assertOk();
+    }
+
     public function test_sign_edits_invalidate_linked_question_publication(): void
     {
         $this->actingAs(User::factory()->create(['is_admin' => true]));

@@ -15,9 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(ProductionSecurity::class);
-        if ($proxies = env('TRUSTED_PROXIES')) {
-            $middleware->trustProxies(at: array_filter(array_map('trim', explode(',', $proxies))));
-        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
