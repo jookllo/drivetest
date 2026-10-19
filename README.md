@@ -1,12 +1,17 @@
-# DriveTest — quiz website, colours, and mascot guide
+# DriveTest — application, content, design, and deployment guide
 
 Last updated: 19 October 2026.
 
 DriveTest is a road-sign learning project for a public quiz website and a future mobile app. Players should be able to practise without creating an account, receive useful explanations, and share their scores. The owner needs a private editor for signs, questions, answers, and publication.
 
-This README records the product direction, proposed colour system, mascot assets, content requirements, and implementation priorities. It is a handoff guide for future design and development work. **A requirement documented here is not a claim that the feature has already been built.**
+This is the single maintained guide to the implemented application, content workflow, visual theme, remaining work, and Dokploy deployment. **Implemented**, **pending launch**, and **future** are separate statuses: documentation and a passing local test suite do not mean the application has been deployed or all content approved.
 
 ### Start here
+
+- [Deploy to Dokploy](#20-dokploy-deployment-runbook)
+- [Prioritized remaining work](#12-implementation-status-and-prioritized-work)
+- [Future improvements](#21-future-improvements)
+- [GitHub and release workflow](#22-github-and-release-workflow)
 
 - [Run the server, use the API, and import labels](#14-api-setup-endpoints-and-content-operations)
 - [Try the local demo](#local-demo-when-no-public-questions-are-available)
@@ -26,19 +31,19 @@ This README records the product direction, proposed colour system, mascot assets
 | Sign library | Existing SVG artwork, names, label files, and browser-based label tools. Artwork and classifications still require review before public use. |
 | Backend | Existing Laravel API and MySQL setup, with read endpoints and a CLI sign importer. See section 14 below for setup and endpoints. |
 | Public quiz | A Vue 3 frontend is served by the Laravel app at `/quiz` (no build step: a vendored global Vue build plus plain CSS/JS in `api/public/`). It consumes stored questions and server-selected, server-marked guest attempts. |
-| Quiz scope | Expand to sign meanings, classes, subcategories, general road questions, multiple-choice questions, and questions with multiple correct answers. |
+| Quiz scope | Authored names/meanings, classes, subcategories and general questions; single or multiple correct answers, optional linked signs and ordered groups. Reviewed content coverage is still required. |
 | Player accounts | Not required for the initial website. |
 | Quiz generation and timers | Implemented: 10/20-question practice and a 10-question, 5-minute challenge with server deadlines. The isolated local demo stays at four samples. |
 | Administration | Protected sign and question editor at `/mdosimimi`, with terminal account creation and password recovery. |
 | Results and sharing | Server-marked scores and opaque, shareable result links are implemented. |
-| Colours | Forest green, warm cream, charcoal, white, amber, and burgundy are the proposed visual direction recorded below. |
+| Colours | Forest green, warm cream, charcoal, white, amber, and burgundy are the current visual direction recorded below. |
 | Mascot | Blanket-and-drink image is wired into the Vue results page. Hands-on-cheeks sharing pose remains on a concept sheet and is not integrated. |
 
 This is the single maintained project guide. The previous API README, sign-library README, and API design document have been consolidated here and removed. Coding-agent implementation rules remain in [api/AGENTS.md](api/AGENTS.md); they must not define a competing product specification. Third-party dependency documentation is outside this consolidation.
 
 ### Public quiz frontend
 
-The current quiz is a Vue 3 single-page prototype served by Laravel. It uses a vendored global Vue build in `api/public/vendor/vue.global.prod.js`; its own code does not require a bundler. The implementation is in [app.js](api/public/assets/quiz/app.js), [quiz.css](api/public/assets/quiz/quiz.css), and the [Blade page shell](api/resources/views/quiz.blade.php).
+The current quiz is a Vue 3 interface served by Laravel. It uses a vendored global Vue build in `api/public/vendor/vue.global.prod.js`; its own code does not require a bundler. The implementation is in [app.js](api/public/assets/quiz/app.js), [quiz.css](api/public/assets/quiz/quiz.css), and the [Blade page shell](api/resources/views/quiz.blade.php).
 
 Start Laravel on the project’s API port, if it is not already running:
 
@@ -50,7 +55,7 @@ php artisan serve --host=127.0.0.1 --port=8001
 Open `http://127.0.0.1:8001/quiz`; `/` on that server serves the same page. The separate root `index.html` redirects to the old labeling tool. Serving the repository with a static server on port 8000 does not run Laravel or its API.
 
 - The connected page reads the stored question bank through session-protected quiz endpoints. Both single- and multiple-answer questions can be authored for each topic.
-- The proposed palette is already used by the stylesheet. Reusing the existing Vue shell and CSS is reasonable; switching frameworks will not solve the missing quiz model.
+- The stylesheet implements the palette below. Continue working in the existing Vue shell and shared CSS.
 - During review on 18 October, the live page showed “No published signs are available yet.” No records were published or edited during the review.
 - The CLI `signs:publish` command exists, but changing publication status does not verify artwork, classification, or question quality. Do not bulk-publish the catalog merely to make the demo work. Use a reviewed, explicitly selected set for public content; use isolated sample data for prototype testing.
 
@@ -58,7 +63,7 @@ Open `http://127.0.0.1:8001/quiz`; `/` on that server serves the same page. The 
 
 In local development on this computer, open `http://127.0.0.1:8001/quiz?demo=1`, or choose **Try the local demo** on the unavailable screen. This runs four explicit sample questions: sign identification, class, subcategory, and multiple-answer selection. It does not access the database, publish signs, save scores, or generate share links. It is enabled only for `APP_ENV=local` and loopback requests; production does not receive the fixture data.
 
-The samples live in `api/resources/quiz-demo.json` and are for interface testing only. They are separate from the implemented database question bank and admin editor. The main public quiz still requires published catalog content.
+The samples live in `api/resources/quiz-demo.json` and are for interface testing only. They are separate from the implemented database question bank and admin editor. The connected quiz requires enough reviewed, published questions; sign-linked questions additionally require published signs and artwork. Publishing signs alone does not create questions.
 
 ### Current implementation and administration
 
@@ -107,7 +112,7 @@ Quiz/session routes live in `api/routes/quiz.php`, loaded from `routes/web.php` 
 | POST `/api/v1/quiz-attempts/{id}/complete` | Finalise owned attempt |
 | GET `/api/v1/results/{publicId}` | Public final score summary |
 | GET `/api/v1/admin/session` | Admin state and CSRF bootstrap |
-| POST `/api/v1/admin/login`, `/logout` | Administrator sign-in/out |
+| POST `/api/v1/admin/login`, `/api/v1/admin/logout` | Administrator sign-in/out |
 | GET, POST `/api/v1/admin/questions` | List or create questions |
 | PUT `/api/v1/admin/questions/{id}` | Validate and update a question |
 | GET `/api/v1/admin/signs` | Private sign catalog |
@@ -126,7 +131,7 @@ Import up to 500 questions from a JSON array with `php artisan questions:import 
 
 Run `php artisan test --compact` from `api/`. PHPUnit pins MySQL to `drivetest_test`, which must exist separately from `drivetest`. `QuizBrowserSeeder` is restricted to that test database and contains disposable fixture credentials; never use it for real content.
 
-Named throttles, restrictive default CORS, admin authorization, CSRF, private response caching, production debug suppression, HTTPS redirects and secure-cookie defaults are implemented. Before deployment configure `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://your-domain`, `SESSION_SECURE_COOKIE=true`, a real TLS certificate and only your reverse proxy addresses in `TRUSTED_PROXIES`. Keep CORS origins empty for same-origin use; explicitly configure `CORS_ALLOWED_ORIGINS` if needed. Serve only `api/public`, never the repository root. Run Laravel's scheduler every minute for `quiz:expire`; reads/submissions also enforce expiry.
+Named throttles, restrictive default CORS, admin authorization, CSRF, private no-store response headers, production debug suppression, HTTPS redirects and secure-cookie defaults are implemented. Before deployment configure `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://your-domain`, `SESSION_SECURE_COOKIE=true`, a real TLS certificate and only your reverse proxy addresses in `TRUSTED_PROXIES`. Keep CORS origins empty for same-origin use; explicitly configure `CORS_ALLOWED_ORIGINS` if needed. Serve only `api/public`, never the repository root. Run Laravel's scheduler every minute for `quiz:expire`; reads/submissions also enforce expiry.
 
 Remaining launch work: reviewed question coverage, sign/artwork verification, the standalone sharing mascot, comprehensive device/accessibility checks, mail-based recovery if wanted, hosting/TLS, backups and restore drills, monitoring, and an anonymous-data retention/deletion policy. Per-question timers, adaptive selection and mobile tokens are not implemented. Theme and mascot requirements below remain the design contract.
 
@@ -339,15 +344,15 @@ Do not show a topic as available if it has no reviewed, published questions. Han
 
 “Multiple questions” and “multiple correct answers” are separate capabilities. Support both. Avoid asking a sign's subcategory when it is unassigned or not applicable.
 
-### Proposed marking rules
+### Implemented marking rules
 
 - Single-answer questions: one point for the correct choice, otherwise zero.
-- Multiple-answer questions: recommended initial rule is one point only if the selected set exactly matches the correct set. State this before play; partial credit is a later product decision.
+- Multiple-answer questions: one point only if the selected set exactly matches the correct set. State this before play; partial credit is a later product decision.
 - Calculate scores on the server for real quizzes. The prototype's client-side scoring is only a demonstration.
 - Do not accept a client-supplied total as the official result.
-- Practice mode can explain each answer immediately. A future test mode can defer feedback until completion; decide this before building both modes.
+- Practice feedback follows a checked answer (or completed group); timed-challenge feedback is deferred until finalisation.
 - If a set asks several related questions about one sign, immediate feedback may reveal answers to later questions. Either defer group feedback or treat this explicitly as guided learning.
-- Store the question version and option order used for an attempt so later edits do not change an existing score or review.
+- The attempt stores question version, text, keys and option order so later edits do not change existing marking; immutable artwork copies remain future work.
 
 ## 7. Question bank and owner-provided content
 
@@ -370,7 +375,7 @@ Questions should be separate from sign records. A sign can have many questions; 
 | Version / update timestamp | Keep attempts and reviews consistent after edits |
 | Group ID, optional | Connect a sequence of questions about the same sign |
 
-The editor should allow adding, editing, previewing, saving drafts, and publishing. Validate that questions have enough distinct choices, a valid answer key, and a single correct choice when the type requires one. Publication should require a content review, not just valid form fields.
+The editor allows adding, editing, saving drafts and publishing, with a linked sign preview. A dedicated player-format question preview remains an improvement. Validate that questions have enough distinct choices, a valid answer key, and a single correct choice when the type requires one. Publication should require a content review, not just valid form fields.
 
 ### How the owner can supply questions
 
@@ -423,7 +428,7 @@ These examples follow the project's requested taxonomy. Driving advice and offic
 
 Existing source material includes [signs/manifest.json](signs/manifest.json), [sign-labels.json](sign-labels.json), [signs_metadata.json](signs_metadata.json), [signs_labels.csv](signs_labels.csv), and [signs/svg/](signs/svg/). See section 15 below for library coverage, editing, and regeneration.
 
-The future connected editor should save authoritative changes to the database and reload them after refresh. Current browser-local edits are not automatic database updates; export/import remains necessary where the existing tools require it.
+The connected editor at `/mdosimimi` saves authoritative changes to MySQL and reloads them after refresh. The separate static gallery/labeling tools still use browser-local edits; their changes require export/import to reach MySQL.
 
 ## 9. Public quiz and private administration
 
@@ -441,7 +446,7 @@ The browser editor uses built-in session authentication; Sanctum remains an opti
 
 ### Security requirements carried forward from the review
 
-- Add named rate limits for catalog reads, quiz creation, submissions, and admin login. Tune limits so image loads and people on shared networks are not unnecessarily blocked.
+- Named rate limits are implemented per IP: catalog 300/minute, quiz/session requests 180/minute, quiz creation 10/minute, admin login 5/minute. Tune only after measuring shared-network and image-load behavior; configure trusted proxies correctly.
 - Keep correct answers and explanations that reveal them out of unanswered-question responses.
 - Use expiring anonymous attempt credentials and unpredictable public result identifiers. A result link must not grant permission to submit or modify an attempt.
 - Finalise each attempt once; retries must not award points twice.
@@ -485,50 +490,60 @@ Do not include a leaderboard in the initial scope unless requested. A public ran
 - Treat refresh/resume behaviour as a deliberate feature: define attempt expiry and restore valid server-backed progress when supported.
 - Keep untimed practice available. Offer the optional timed challenge described in section 17; never impose a timer on every player.
 
-## 12. Implementation sequence and completion checks
+## 12. Implementation status and prioritized work
 
-### First: confirm content and prepare assets
+### Completed in source and checked locally
 
-- Review sign names, classes, subcategories, and meanings.
-- Prepare a starter set of reviewed questions across the requested topics.
-- Implement the starting quiz lengths and mode-specific feedback rules in section 17; tune durations after usability testing.
-- Separate the sharing mascot from its concept sheet and optimise approved assets.
-- Apply and test the colour tokens across questions, answers, results, and errors.
+| Area | Delivered | Verification / limit |
+| --- | --- | --- |
+| Catalog | Stable IDs, SVG library, edited labels, A/B/C taxonomy, private image delivery, published-only public reads | Artwork and meanings still need human review |
+| Questions | MySQL question bank, 2–6 text options, exact-set multiple answers, explanations, groups, sign links, versions, review gate | Ten starter taxonomy drafts; no automatic production publication |
+| Guests | Anonymous session ownership, saved answers, resume, immutable question snapshots | Cookie/session loss prevents access to private attempts; not cross-device history |
+| Quizzes | 10/20-question practice, 10-question five-minute challenge, quota selection and server marking | Sufficient reviewed pools required; random retries do not guarantee finding every feasible grouped selection |
+| Results | Finalisation, expiry job, private answer review, opaque public score links | Practice results, not certified exams; no retention cleanup yet |
+| Editor | `/mdosimimi`, admin authorization, sign/question edits, optimistic conflict checks | No media uploads, audit-log interface, or email recovery |
+| Recovery | Private terminal account creation and password reset | Production account must exist in the production database |
+| Security | CSRF, session checks, named throttles, CORS configuration, HTTPS redirects/HSTS, production debug suppression | Reverse-proxy/TLS configuration must be verified on Dokploy |
+| Presentation | Existing Vue interface, shared palette, blanket results mascot, local-only four-question demo | Full mobile/accessibility and browser regression testing outstanding |
+| Documentation / Git | One main README, agent-only instructions, `.gitignore`, first commit pushed to GitHub `master` | Database contents, local secrets and runtime files are not in Git |
 
-### Next: build the quiz and editor
+Verification on 19 October 2026: **29 PHP tests passed, 168 assertions**; Pint formatting completed; all three quiz JavaScript files parsed. Coverage includes guest ownership, answer-key disclosure, exact-set scoring, deadline boundaries, groups, snapshots, admin authorization, draft imports, publication conflicts, recovery and HTTPS behavior. This is not a full production or cross-browser certification. The README-only deployment recipes below have not been built or exercised on Dokploy.
 
-- Implement question/options/version storage and anonymous attempt storage.
-- Build protected question and sign editing with draft/publish controls.
-- Implement public quiz creation, answer submission, server-side marking, and results.
-- Connect the responsive frontend to the API.
-- Implement score sharing and answer review.
-- Add the security controls listed above before public deployment.
+### P0 — before making the public quiz available
 
-### Before launch
+| Work | Correct location / owner | Done when |
+| --- | --- | --- |
+| Production container | Repository root `Dockerfile`, `.dockerignore`; `api/docker/` runtime files proposed in section 20 | Staging image builds; only `api/public` is served; imports can read sibling `signs/` |
+| Dokploy environment | Dokploy application, MySQL, volume, domain and job settings | HTTPS, sessions, DB, artwork and scheduled expiry survive redeploy |
+| Content review | Owner in `/mdosimimi`; source SVGs in `signs/svg/` | Enough verified questions for every advertised topic, filter and length |
+| Question coverage | MySQL via editor or `questions:import` | Mixed default has at least 4 names, 2 classes, 2 subcategories, 2 general slots with valid uniqueness/groups; twice that for 20, and 10/20 for each offered focused topic |
+| Backups / restore | Dokploy MySQL backups, private-storage volume backups, secret manager | An isolated restore actually recovers questions, users and SVGs |
+| Privacy / retention | Owner policy; later prune command in `api/app/Console/Commands/` | Published retention expectations and tested scheduled deletion; deleting attempts also removes their public results |
+| Release smoke tests | Staging browser + `api/tests/` | Anonymous quiz, timer/reload, share link, editor save/reload, permissions and mobile layout checked |
 
-- Confirm guest players can finish and share without an account.
-- Confirm multiple-answer marking follows the stated rule.
-- Confirm question edits do not alter old results.
-- Confirm repeated submissions cannot change a final score.
-- Confirm draft content and answer keys do not leak through question responses.
-- Confirm ordinary players cannot access admin actions.
-- Confirm editor changes survive refresh and a new browser session.
-- Test keyboard use, mobile layout, colour contrast, network failures, and missing-result states.
-- Check production settings, backups, and a restore process.
-- Verify the mascot does not conceal content and no rejected pose appears in public UI.
+Minimum counts are necessary but not sufficient: independent-sign uniqueness, classification filters and complete groups may need larger pools. `StarterQuestionSeeder` has no name questions and cannot by itself make the mixed quiz available. Do not publish its drafts blindly.
+
+### P1 — next reliability and editorial work
+
+- Add browser regression tests for save/retry, reload, expired sessions, result sharing, admin edits and narrow screens. Warn before navigating away from an unchecked practice selection; currently only checked practice answers persist.
+- Review sign import/publication consistency: editor sign changes return linked questions to draft, but CLI imports/publication do not yet share that same review workflow. Add centralized invalidation and regression tests before routine production bulk imports.
+- Ensure publication verifies that the referenced artwork file actually exists, not just that its path is filled in. Add missing-image reporting.
+- Make selection availability more informative; handle tight grouped pools more deterministically and suggest workable filters when a requested quiz cannot be assembled.
+- Prepare the standalone sharing mascot from the approved right-hand pose; optimize images, test keyboard/focus/contrast, and verify no rejected pose reaches the interface.
+- Add editorial audit history, reviewer attribution and safe archival/unpublication. Current version checks prevent accidental overwrites but are not an audit trail.
+- Add deeper readiness checks for MySQL and private storage, deployment smoke automation and alerting for 5xx, scheduler/backup failures and disk pressure.
 
 ## 13. Decisions still open
 
-1. Mascot name, if one is wanted.
-2. Final approval of welcome and standalone sharing artwork.
-3. Whether to expose the optional 20-question mode at first launch; the starting default is 10.
-4. Final time allowances after trials; the starting challenge is 10 questions in 5 minutes.
-5. Whether to introduce per-question speed challenges after whole-quiz timing works. Section 17 defines the proposed baseline for navigation and unanswered questions.
-6. Retention period for anonymous attempts and shared results.
-7. Whether optional nicknames are needed at launch.
-8. Production domain, hosting, and admin account setup.
+1. Production domain and Dokploy server sizing/region. **Hosting is now Dokploy**, with a single application instance and MySQL recommended initially.
+2. Start from a clean production content import or migrate the existing local DB and private artwork. Git does not transfer either automatically.
+3. Reviewed launch topics, question counts and whether to expose 20 questions immediately (it is implemented).
+4. Retention for abandoned attempts and public results; whether users need a result deletion mechanism.
+5. Mascot name, final welcome/share artwork and acceptable media sizes.
+6. Whether email recovery, admin MFA, more editors, or optional player identities are needed.
+7. Challenge durations after learner trials; per-question speed modes remain future work.
 
-Keep this README current as those decisions are made. Update the status table when a planned feature becomes implemented and verified.
+Record decisions here when agreed, and update the status tables when implementation is verified.
 
 ## 14. API setup, endpoints, and content operations
 
@@ -625,7 +640,7 @@ cd /home/okello/Documents/projects/DriveTest/api
 php artisan signs:import ../sign-labels.json --dry-run
 ```
 
-After reviewing the proposed import, run the same command without `--dry-run`. The importer matches stable IDs, preserves supplied names, retains existing meanings if absent, copies approved source artwork to private storage, and resets imported records to draft. Missing entries are not deleted. Unknown IDs, duplicate IDs, and artwork/path substitutions are rejected for separate review.
+After reviewing the proposed import, run the same command without `--dry-run`. The importer matches stable IDs, preserves supplied names, leaves existing meanings unchanged (this importer only updates names, classification, artwork references and review status), copies manifest-listed source artwork to private storage, and resets imported records to draft. Missing entries are not deleted. Unknown IDs, duplicate IDs, and artwork/path substitutions are rejected for separate review.
 
 The publication command accepts exactly one selector: `--id` (repeatable), `--class`, or `--all`. Prefer explicit reviewed IDs. Example preview, not evidence this sign has been reviewed:
 
@@ -739,7 +754,7 @@ For example, “Warning signs only” is a content filter; it can be practised u
 
 Multiple-answer questions may occupy appropriate slots within these topics. Do not mechanically generate two correct options every time; the reviewed answer key decides the correct set. Aim for sensible coverage of A/B/C across eligible sign questions without forcing three classes into every small topic block.
 
-If general questions are not yet available, the proposed interim blueprint is **6 identification/meaning + 2 class + 2 subcategory**. Tell the player the available mix before starting. If that pool is also insufficient, explicitly offer a shorter quiz or another filter. Never repeat questions, silently change topics, or unlock drafts merely to reach ten.
+If general questions are not yet available, the implemented fallback blueprint is **6 identification/meaning + 2 class + 2 subcategory**. Tell the player the available mix before starting. If that pool is also insufficient, the current API returns a validation error. The player must change filters or the owner must add reviewed content; suggesting alternatives is future UX work. Never repeat questions, silently change topics, or unlock drafts merely to reach ten.
 
 For optional 20-question mixed practice, start with doubled quotas only when sufficient eligible material exists. Treat focused modes as their own validated blueprints rather than applying mixed-mode quotas blindly.
 
@@ -750,7 +765,7 @@ For optional 20-question mixed practice, start with doubled quotas only when suf
 3. Build deterministic eligible pools; availability counts must not depend on a random dry-run selection.
 4. Select without replacement by stable question ID. Avoid repeated signs in independent questions, including signs used in image answer choices where those would disclose later answers.
 5. Treat intentional multi-question sign groups explicitly. Preserve group order and reserve enough slots for the whole group; do not split a group unexpectedly.
-6. Where feasible, reduce repeats from this guest's recent attempts. A short pool may require repeats between attempts; relax recent-history preferences before breaking within-attempt uniqueness. Do not promise cross-device history without an account or transferable identity.
+6. Future improvement: reduce repeats from this guest's recent attempts. A short pool may require repeats between attempts; relax recent-history preferences before breaking within-attempt uniqueness. Do not promise cross-device history without an account or transferable identity.
 7. Shuffle questions within blueprint/group constraints and shuffle options only when permitted. Options like “all of the above” or ordered sequences should not be blindly shuffled; prefer order-independent authored choices.
 8. Save the selected question versions, order, option order, scoring policy, and timer settings transactionally before serving the attempt. A stored seed alone is not sufficient if underlying questions can change.
 9. Return only safe player-facing fields, not correct-option flags or answer-revealing explanations before the mode allows them.
@@ -759,7 +774,7 @@ A generated distractor is an editorial suggestion, not a reviewed answer option.
 
 ### Timing authority and refresh behaviour
 
-Use server timestamps as the authority. Store `started_at`, `expires_at` (null for untimed), and a snapshotted time limit with the attempt. Return `server_now` and the deadline so the frontend can display remaining time without trusting the device clock.
+Use server timestamps as the authority. The current implementation stores `started_at` and `expires_at`: five minutes for challenges and 24 hours for practice. Practice has no visible countdown; the 24-hour lifetime limits resumability. Return `server_now` and the deadline so the frontend can display remaining time without trusting the device clock.
 
 - Display minutes and seconds as text, with an accessible timer label. Announce meaningful thresholds sparingly, not every second.
 - Compute the countdown from the fixed deadline, not from a decrementing counter that pauses in background tabs.
@@ -802,8 +817,8 @@ Do not build a second quiz in root `index.html`, `labeling_tool.html`, or `signs
 | Controllers | [api/app/Http/Controllers/Api/](api/app/Http/Controllers/Api/) | Request orchestration; delegate selection/marking to services |
 | Validation | [api/app/Http/Requests/](api/app/Http/Requests/) | Mode/filter/length constraints, answer IDs and editor validation |
 | Safe responses | [api/app/Http/Resources/](api/app/Http/Resources/) | Separate public question/result output from private editor and marking data |
-| Business logic | [api/app/Services/](api/app/Services/) | Add selection, scoring and attempt lifecycle services; existing sign import remains separate |
-| Data models | [api/app/Models/](api/app/Models/) | Add question/version/option/attempt/answer/result relationships as needed |
+| Business logic | [api/app/Services/](api/app/Services/) | `QuizEngine` handles selection, scoring and attempt lifecycle; sign import remains separate |
+| Data models | [api/app/Models/](api/app/Models/) | `Question` and `QuizAttempt` store versioned content and frozen answer/result snapshots |
 | Database changes | [api/database/migrations/](api/database/migrations/) | MySQL constraints, indexes and immutable attempt/version references |
 | Test data | [api/database/factories/](api/database/factories/), [api/database/seeders/](api/database/seeders/) | Isolated fixtures and explicitly reviewed starter content; no automatic mass publication |
 | Configuration | [api/config/](api/config/) | Existing `quiz.php` defines modes, lengths, quotas and deadlines |
@@ -850,15 +865,9 @@ For timed modes, a compact text timer and a subtle indicator are enough. Use a l
 
 Use the blanket-and-drink mascot to the left of results on desktop, smaller above/near results on mobile. Use only the right-hand hands-on-cheeks concept for a future standalone sharing asset. Never ship the rejected rear-facing pose or an entire multi-pose sheet. Do not introduce mascot animation as part of implementing timers.
 
-### Delivery order and verification
+### Verification contract
 
-1. Implement reviewed question/version storage and owner authoring/import; preserve existing sign IDs and edited labels.
-2. Implement eligibility, blueprints, no-repeat selection and short-pool handling on the server.
-3. Implement anonymous persisted attempts and marking, then connect the existing frontend for untimed practice.
-4. Add whole-quiz timing with server-enforced expiry and mode-specific feedback/navigation.
-5. Add saved result sharing and finish approved mascot integration; consider extended/per-question modes afterward.
-
-Required checks in addition to section 1's acceptance list:
+The core authoring, selection, guest attempts, server marking, whole-quiz timing and saved sharing are implemented. Remaining release tasks are tracked in section 12. Preserve these checks when extending the implementation:
 
 - Selection respects quotas, filters, published state, groups and option uniqueness; inadequate pools produce an explicit shorter offer or unavailable state.
 - Clock-controlled tests cover just before, exactly at, and after the deadline. Define `server_now >= expires_at` as expired.
@@ -900,6 +909,364 @@ Supported interpretations include typed-only questions, handwritten-only questio
 - Observed selected answer versus independently reviewed correct answer.
 - Confidence/uncertainty notes, resolution, reviewer and draft/publication status.
 
-Private scans may contain names, marks, or other personal information unrelated to the quiz. Keep source material in private editorial storage; publish only the reviewed question content. Do not place uploaded worksheets in `api/public/` as part of intake. Use the future protected editor/import workflow in `api/`, with drafts in MySQL and private uploads, rather than a second JSON-based production question bank.
+Private scans may contain names, marks, or other personal information unrelated to the quiz. Keep source material in private editorial storage; publish only the reviewed question content. Do not place uploaded worksheets in `api/public/` as part of intake. Use the existing protected editor/JSON import workflow in `api/`, with drafts in MySQL; private source-image uploads still need implementation, rather than a second JSON-based production question bank.
 
 A future OCR/extraction service can suggest text, but it is not a prerequisite for manual question entry and must not auto-publish inferred correct answers. For now, the owner can send an image here for transcription and review, then approve the structured draft for implementation.
+
+## 20. Dokploy deployment runbook
+
+### Deployment status and recommended topology
+
+**Dokploy is the chosen deployment platform. No Dokploy services, production secrets, domain or container build have been configured by this documentation change. There is currently no committed Dockerfile or Compose configuration.** The reference files below must be created, built and tested in staging before choosing Dockerfile builds. Do not assume pushing the repository already produces a working production deployment.
+
+Start with one Dokploy Application for Laravel/Apache, one Dokploy MySQL service, a named volume for private SVG files, and one scheduled application job. Traefik terminates HTTPS and forwards to Apache; Laravel handles both the Vue pages and API on the same origin. Redis and a queue worker are unnecessary for the current synchronous features. This is a project-specific deployment recommendation; Dokploy supports several build types, including explicit Dockerfiles. See [Dokploy build settings](https://docs.dokploy.com/docs/core/applications/build-type).
+
+| Component | Required value / role |
+| --- | --- |
+| Repository | `https://github.com/jookllo/drivetest.git` |
+| Branch | `master` |
+| Build context | Repository root `.`; **not just `api/`** |
+| Proposed Dockerfile path | `Dockerfile` at repository root |
+| Container Laravel directory | `/app/api` in the reference layout below |
+| Public document root | `/app/api/public` |
+| Sibling source assets | `/app/signs/manifest.json`, `/app/signs/svg/`, `/app/sign-labels.json` |
+| Internal web port | `80` for the Apache recipe below |
+| Public entry points | `/quiz`, `/mdosimimi`, `/api/v1/*`, `/results/{publicId}` |
+| Database | Private MySQL 8 service, DB `drivetest`, dedicated application user |
+| Persistent application volume | Named volume mounted at `/app/api/storage/app/private` |
+| Session and cache storage | MySQL using `SESSION_DRIVER=database`, `CACHE_STORE=database` |
+| Scheduler | Application job invoking `php /app/api/artisan schedule:run` every minute |
+| Initial replicas | One; do not scale across hosts with a node-local SVG volume |
+
+The sibling layout is required by `SignCatalogImport`, which resolves `../signs/manifest.json` from Laravel's base path. A build containing only `api/` may serve pages but fail all source catalog imports. Public files already include the Vue runtime and mascot, so no Node/Vite build is needed for this UI.
+
+### A. Prepare production build files
+
+These are **reference templates to implement**, not existing files or verified image builds. The paths match the rest of this runbook. Use a PHP/Apache image compatible with PHP 8.3 and the locked Composer dependencies; pin tested image digests for a reproducible release. Never use `php artisan serve`, `composer run dev`, or the root Python gallery server as the production web server.
+
+Proposed root `Dockerfile`:
+
+```dockerfile
+FROM php:8.3-apache-bookworm
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git unzip libonig-dev libzip-dev libicu-dev \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring zip intl bcmath opcache \
+    && a2enmod rewrite \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+WORKDIR /app/api
+COPY api/ /app/api/
+COPY signs/manifest.json /app/signs/manifest.json
+COPY signs/svg/ /app/signs/svg/
+COPY sign-labels.json /app/sign-labels.json
+COPY api/docker/apache.conf /etc/apache2/sites-available/000-default.conf
+COPY api/docker/start.sh /usr/local/bin/drivetest-start
+
+RUN mkdir -p storage/app/private storage/framework/cache/data \
+      storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && COMPOSER_ALLOW_SUPERUSER=1 composer install \
+      --no-dev --prefer-dist --no-interaction --optimize-autoloader \
+    && composer check-platform-reqs --no-dev \
+    && chmod +x /usr/local/bin/drivetest-start \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+EXPOSE 80
+CMD ["/usr/local/bin/drivetest-start"]
+```
+
+Proposed `api/docker/apache.conf`:
+
+```apache
+<VirtualHost *:80>
+    DocumentRoot /app/api/public
+    <Directory /app/api/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog /proc/self/fd/2
+    CustomLog /proc/self/fd/1 combined
+</VirtualHost>
+```
+
+Proposed `api/docker/start.sh` (save with Unix line endings):
+
+```sh
+#!/bin/sh
+set -eu
+cd /app/api
+mkdir -p storage/app/private storage/framework/cache/data \
+  storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+su -s /bin/sh www-data -c 'php artisan config:cache && php artisan view:cache'
+exec apache2-foreground
+```
+
+This caches configuration **at runtime after Dokploy injects environment variables**. No migrations, imports, user creation, destructive resets or key generation run automatically on container restart. Migration failure must stop a release, not be hidden in a startup loop. For large volumes, replace recursive ownership correction with a tested one-time initialization so restarts remain quick.
+
+Proposed root `.dockerignore`:
+
+```text
+.git
+**/.env
+**/.env.*
+!**/.env.example
+**/auth.json
+**/*.pem
+**/*.key
+**/node_modules
+api/vendor
+api/bootstrap/cache/*.php
+api/storage
+!api/storage/**/.gitignore
+api/tests
+**/*.sql
+**/*.sql.gz
+**/*.sqlite*
+**/*.log
+**/__pycache__
+signs/backups
+signs/road-signs-svg.zip
+.codex
+.tmp
+tmp
+```
+
+The build recreates writable storage directories; actual private SVGs come from the persistent volume/import. Do not copy your laptop `.env`, cached config, sessions or test fixtures into an image. `.gitignore` and `.dockerignore` have different jobs: the latter is required even when the Git repository is clean.
+
+After implementing these files, build from the repository root in an environment with Docker:
+
+```bash
+docker build -t drivetest:staging .
+```
+
+Exercise the image against a separate staging database and volume before production. This README change does not claim that command has passed. If you choose Nixpacks/Railpack instead, establish the same sibling assets, PHP extensions, public document root, runtime environment, storage and scheduler behavior explicitly; automatic detection of this repository root is not enough.
+
+### B. Create the project, application and database
+
+1. Create a DriveTest project/environment in Dokploy; use separate staging and production services, databases, volumes and keys.
+2. Connect GitHub using Dokploy's provider integration and authorize this repository. Select `jookllo/drivetest`, branch `master`. Private repository access belongs to the Dokploy server/integration; your laptop's SSH key/configuration is not automatically available there. See [Dokploy providers](https://docs.dokploy.com/docs/core/providers).
+3. Create a MySQL service and deploy it first. Use the tested MySQL major version, a persistent database volume and a dedicated `drivetest_app` account scoped to `drivetest`. Keep MySQL private; do not publish port 3306 to the internet. Record the internal hostname and port supplied by Dokploy. See [Dokploy databases](https://docs.dokploy.com/docs/core/databases).
+4. Create the Application using the Dockerfile settings in the table above **after committing the build files**. Leave any build-stage override empty for the single-stage reference image.
+5. Make sure the app and MySQL can communicate on their internal network. `DB_HOST=127.0.0.1` inside the web container points to the web container itself, not your MySQL service.
+6. Add the named volume and environment variables before deployment. Keep automatic deployments disabled until the migration/backup/smoke procedure has been rehearsed.
+
+Do not run `app:setup-mysql` on Dokploy: that command assumes a local machine with sudo and writes a local `.env`. Create the DB/user through the database service's administration workflow instead.
+
+### C. Set runtime environment variables
+
+Configure these in the application's runtime environment. Replace every placeholder privately; do not paste production secrets into this README or commit them. Dokploy supports service/project environment configuration; ensure values actually reach the running container. See [Dokploy environment variables](https://docs.dokploy.com/docs/core/variables).
+
+```dotenv
+APP_NAME=DriveTest
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=REPLACE_WITH_A_STABLE_GENERATED_KEY
+APP_URL=https://quiz.example.com
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_MAINTENANCE_DRIVER=file
+
+LOG_CHANNEL=stderr
+LOG_LEVEL=warning
+
+DB_CONNECTION=mysql
+DB_HOST=REPLACE_WITH_DOKPLOY_INTERNAL_MYSQL_HOST
+DB_PORT=3306
+DB_DATABASE=drivetest
+DB_USERNAME=drivetest_app
+DB_PASSWORD=REPLACE_WITH_PRIVATE_DATABASE_PASSWORD
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=true
+SESSION_SECURE_COOKIE=true
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
+SESSION_COOKIE=drivetest_session
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+CACHE_STORE=database
+CACHE_PREFIX=drivetest_production
+QUEUE_CONNECTION=sync
+FILESYSTEM_DISK=local
+BROADCAST_CONNECTION=log
+
+CORS_ALLOWED_ORIGINS=
+TRUSTED_PROXIES=REPLACE_WITH_VERIFIED_PROXY_IPS_OR_CIDRS
+MAIL_MAILER=log
+```
+
+Generate a key once in a private terminal using `php artisan key:generate --show`, then store it as `APP_KEY` in Dokploy and your secure backup. Do not regenerate it on every build/restart: changing it invalidates encrypted cookies and can make encrypted data unreadable. For an existing installation, retain its key or plan an explicit key rotation. Use a distinct staging key and cookie name.
+
+`MAIL_MAILER=log` does not deliver email and does not enable password recovery. Even after configuring SMTP, a password-token flow and its UI/tests must be implemented. `QUEUE_CONNECTION=sync` means no separate queue worker is needed today; add one only when introducing queued jobs.
+
+`SESSION_DRIVER=database` keeps sessions through container replacement and lets terminal admin recovery delete existing admin sessions. Database cache keeps throttles/locks consistent across container restarts. Both require the shipped migrations. Empty same-origin CORS is intentional; this configuration does not support credentialed cross-origin admin clients without further work.
+
+### D. Configure private storage and permissions
+
+Create a Docker named volume such as `drivetest-private-production` and mount it at `/app/api/storage/app/private`. The image importer writes SVGs under `signs/` inside that mount. Grant the runtime `www-data` user write access; the reference startup script initializes ownership. Avoid world-writable `chmod 777` fixes.
+
+Do not mount a blank volume over `/app`, `/app/api`, `public`, or the source `/app/signs`: that would hide code/assets included in the image. Do not create a public storage symlink for the private sign directory. Images must continue through the controlled sign endpoints. Runtime caches/views may be rebuilt; MySQL and private SVGs may not be discarded on redeploy. Dokploy's application advanced settings support container commands and storage configuration; see [advanced application settings](https://docs.dokploy.com/docs/core/applications/advanced).
+
+Start with one replica on one host. Multiple hosts require shared private artwork storage (or a carefully versioned image delivery design), shared sessions/cache and scheduler coordination. A Docker named volume on one node is not a shared filesystem across the cluster.
+
+### E. Domain, HTTPS and trusted proxies
+
+Point the chosen domain's DNS to the Dokploy server. Configure the Application domain with host `quiz.example.com`, path `/`, internal path `/`, no path stripping, container port `80`, HTTPS enabled and a valid certificate (for example Let's Encrypt). Use the actual domain in `APP_URL`. The UI uses root-relative URLs; deploying under `/drivetest` would need code changes. Do not route the public domain to port 8001 from the local development instructions. Dokploy routes domain traffic through Traefik; the domain's container port is not a request to publicly expose that port. See [Dokploy domains](https://docs.dokploy.com/docs/core/domains).
+
+`ProductionSecurity` redirects requests Laravel considers insecure. Traefik terminates HTTPS upstream, so Laravel must trust the actual proxy peer/network to honor `X-Forwarded-Proto` and the client IP. Find the app's actual proxy/network addresses in Dokploy/Docker and set the comma-separated `TRUSTED_PROXIES` values accordingly. Do not copy an arbitrary example CIDR or trust every internet address. Keep direct backend ingress restricted to the proxy. Test this after redeployment: a changing proxy address can otherwise cause redirect loops or shared-IP rate-limit failures.
+
+An HTTP-only preview URL is not a sufficient production test for this application. Test the intended HTTPS hostname, including cookies and generated image/share URLs. `SESSION_DOMAIN=null` keeps a host-only cookie; use one canonical hostname initially.
+
+### F. First deployment and content bootstrap
+
+Deploy the built app and use a terminal **inside its container**. Non-interactive commands may use Dokploy's Run Command; account creation/reset needs an interactive terminal because it asks for a password privately. All following application commands assume `cd /app/api`.
+
+```bash
+php artisan migrate --force
+php artisan migrate:status
+php artisan route:list --except-vendor
+```
+
+Do not run `migrate:fresh`, `db:wipe`, test seeders or PHPUnit against production. Do not run the scaffold's `composer setup`: it has development setup/key/build behavior. A release migration is a deliberate operator step after backups and before accepting traffic, not a build-time database connection.
+
+For a **new empty production catalog**, validate and import the chosen label export:
+
+```bash
+php artisan signs:import /app/sign-labels.json --dry-run
+php artisan signs:import /app/sign-labels.json
+php artisan db:seed --class=StarterQuestionSeeder --force
+php artisan app:create-admin your-email@example.com
+```
+
+Use the reviewed current export if it differs from the committed one. Imports reset signs to draft and should not be routine startup/redeploy steps. New drafts and the starter seed do not make the quiz ready. Log in at `https://quiz.example.com/mdosimimi`, review signs and classifications, then author/import and publish enough questions. Unverified artwork/content must stay unpublished. The original `/admin` page intentionally returns 404.
+
+For **migration of existing local data**, take a private MySQL backup and matching `api/storage/app/private` copy, restore them into the isolated target, verify ownership and migrate forward. Do not re-import over live editorial changes merely to repopulate files. Restoring a database carries users and draft content too; audit what should become public. Question snapshots include absolute image URLs, so old localhost-based attempts are not automatically portable; decide whether to exclude old development attempts before launch. Preserve the appropriate key for encrypted data, and expect old domain-bound browser sessions to need reauthentication. Database dumps and private files must never be committed to Git.
+
+The GitHub repository does not include your local database, admin password, `.env` or runtime SVG copies. A fresh deployment needs the bootstrap above or an intentional data migration.
+
+### G. Schedule expiry and verify health
+
+Create one **Application** scheduled job targeting the web application:
+
+```text
+Schedule: * * * * *
+Command: php /app/api/artisan schedule:run
+```
+
+This runs the existing `quiz:expire` schedule in `api/routes/console.php`. Check job execution logs and `php artisan schedule:list`. Do not also start a duplicate `schedule:work` process or host cron for the same installation. Reads and submissions still enforce expiry if a job is late. See [Dokploy Schedule Jobs](https://docs.dokploy.com/docs/core/schedule-jobs).
+
+The Laravel `/up` endpoint checks application boot, not full database/content readiness. Production HTTP probes can receive 308 because HTTPS enforcement also applies to `/up`; do not label that a database outage. Prefer an external HTTPS probe through the correctly configured domain, plus a separate tested container health check and DB/content checks. Do not solve probe redirects by disabling production HTTPS protection. A dependency-aware readiness endpoint is remaining work.
+
+### H. Smoke test before opening access
+
+| Check | Expected result |
+| --- | --- |
+| `https://your-domain/up` | 200 through HTTPS; no redirect loop |
+| `/quiz`, `/mdosimimi` | Player page and editor login load with CSS/JS; no mixed-content errors |
+| `/api/v1/classes` | Correct A/B/C taxonomy |
+| `/api/v1/admin/questions` without authentication | 401; never private answer keys |
+| `/api/v1/preview/signs` in production | Denied; no draft leakage |
+| `?demo=1` in production | No local fixture data |
+| Published sign image | SVG loads through controller; drafts do not load publicly |
+| Anonymous practice | Ten reviewed questions, checked answers survive reload, score marked server-side |
+| Timed challenge | Reload does not restart timer; late answers cannot change result |
+| Shared link in another browser | Score summary loads; private attempt remains inaccessible |
+| Editor save and reload | Label/question changes persist; stale updates conflict rather than overwrite |
+| Admin password reset | New password works; existing protected sessions no longer authorize edits |
+| Redeploy with same DB/key/volume | Editorial content, published SVGs and valid guest sessions persist |
+| Mobile + keyboard | Options/buttons reachable, visible focus, no horizontal overflow or hidden content |
+| Backup and restore | Separate restored service has correct rows and working artwork |
+
+The schema alone does not guarantee quiz availability. Test all advertised modes and filters, including empty pools and network failures. For UI diagnosis, inspect browser requests and container logs without exposing passwords/session tokens.
+
+### I. Backups, updates and rollback
+
+Back up **three separate things**: MySQL data; the private-artwork named volume; and required secrets/configuration including `APP_KEY`. Retain the Git commit/image identifier for each release. Runtime data backups belong in access-controlled storage outside the application host.
+
+Configure MySQL backups to an S3 destination in the database's Backup tab, choose `drivetest`, set a schedule and run a test backup. Record the chosen retention and recovery objectives; a daily backup is only a starting proposal. See [Dokploy database backups](https://docs.dokploy.com/docs/core/databases/backups).
+
+Configure a matching backup for the private SVG named volume. Dokploy volume backups support named volumes, not bind mounts. Take a consistent DB/artwork snapshot during a quiet period or maintenance window for bulk content changes. Test restoring both together. See [Dokploy volume backups](https://docs.dokploy.com/docs/core/volume-backups).
+
+Dokploy's own platform backup protects its configuration and internal database; do not assume it replaces application MySQL and artwork backups. See [Dokploy platform backups](https://docs.dokploy.com/docs/core/backups).
+
+Release sequence:
+
+1. Review changes and pass the local/staging tests. Record the release commit; keep production secrets out of build arguments and image layers.
+2. Back up the production DB and private files before migrations/content imports. Verify that a previous restore drill succeeded.
+3. Build the candidate image, deploy to staging and run the smoke checks.
+4. For production, initially use a controlled maintenance window. Keep traffic gated while starting the new image and running `php artisan migrate --force` in its container. Reapply maintenance/access gating across replacement containers if needed: file-based `artisan down` state is container-local.
+5. Rebuild runtime config/views after environment changes (the reference startup does this), verify health/smoke tests, then reopen traffic. Never silently regenerate `APP_KEY`.
+6. If code deployment fails, return to the known-good image/commit only if it is compatible with the current schema. Image rollback does not undo database migrations. Use a forward fix or a coordinated DB/files restore for incompatible migrations; assess data written since the backup first.
+7. Confirm the scheduler, backup jobs and external monitoring still target the current service. Once this process is reliable, automate safe steps in CI/CD; a push is not automatically a tested production release.
+
+### J. Troubleshooting
+
+| Symptom | Check / action |
+| --- | --- |
+| 502 / bad gateway | App container running, Apache listening on 80, correct domain container port and internal network |
+| Endless HTTPS redirects | Actual proxy address allowed in `TRUSTED_PROXIES`; forwarded scheme honored; correct `APP_URL` |
+| 419 on login/answer | Cookies enabled, correct HTTPS hostname, fresh CSRF bootstrap, stable key, sessions table migrated, no cached personalized responses |
+| DB connection refused | Use Dokploy internal hostname, not localhost; check service readiness, network, credentials and database grants |
+| Missing table errors | Run forward migrations in the intended DB; never use a reset to fix production |
+| No questions available | Publish reviewed questions with eligible published sign links; verify quota/filter coverage; ten starter drafts alone are insufficient |
+| SVG 404 after deployment | Private volume mounted and populated; file ownership; sign publication; source and runtime artwork are different locations |
+| Import cannot find manifest | Root build context and sibling `/app/signs` copied into the image |
+| Permission denied writing storage | Runtime ownership of mounted private storage and framework/cache directories |
+| Many players receive 429 together | Correct client IP through trusted proxy; inspect rate-limit load before changing limits |
+| Admin cannot log in after fresh deploy | Local account is not in new DB; create the production admin or deliberately restore users |
+| Password forgotten | Interactive `php artisan app:reset-admin-password your-email@example.com`; email reset is not available |
+| New environment value ignored | Rebuild runtime config/redeploy; no stale build-time config cache |
+| App works but scheduled expiry does not | Job type/target/command, cache DB access and scheduler logs |
+| Disk fills | Check logs, Docker image retention and backups; do not delete DB/artwork volumes to free space |
+
+## 21. Future improvements
+
+These are proposals after the P0/P1 work in section 12, not current features or launch promises.
+
+| Improvement | Benefit / dependency | Implementation area |
+| --- | --- | --- |
+| Email password reset + MFA | Expiring, single-use recovery tokens, mail delivery and stronger administrator access | Laravel auth controllers/notifications, editor UI, security tests |
+| Editorial audit / permissions | Track who changed/reviewed/published each item; separate author/reviewer roles | MySQL migrations/models, admin APIs/editor |
+| Protected uploads and OCR assistance | Import scans; separate printed text, handwriting and uncertain answers for review | Private storage, intake services, optional queue; never auto-publish OCR |
+| Immutable image versions | Historical attempts keep their original artwork after replacement/unpublication | Asset model/storage and attempt snapshots |
+| Smarter selection | Recent-question avoidance, difficulty progression, clearer pool diagnostics and deterministic grouped selection | `QuizEngine`, question metadata and tests |
+| Better practice persistence | Save unchecked drafts separately from locked answers; explain navigation/session expiry clearly | Attempt answer model/API and `app.js` |
+| Timing options | Accessible accommodations and optional per-question speed mode with disclosed rules | `config/quiz.php`, service, UI and boundary tests |
+| Richer question formats | Image options, scenarios and richer grouped questions | Validation, private rendering/media model and scoring rules |
+| Optional player accounts/mobile | Cross-device history or app tokens only if wanted; guests remain supported | Auth/session design, API contract; assess Sanctum then |
+| Analytics with minimal data | Completion/drop-off and difficult questions without exposing private histories | Aggregate events, consent/privacy/retention design |
+| Better sharing | Approved hands-on-cheeks asset and server-generated score cards without private data | `assets/mascot`, runtime derivatives, result rendering |
+| Localization and offline learning | Reviewed translations; cached practice with explicit offline score limitations | Question translations, UI strings and future mobile/PWA layer |
+| CI/CD and scale | Automated tests, image builds, staging checks, shared storage/cache, background workers when required | Repository CI and Dokploy services |
+
+Do not introduce leaderboards or “exam certified” claims based on this public practice catalog. Users can consult the public sign names/classes. Anti-copying is not achieved by hiding a route or placing an API key in JavaScript; concentrate on editorial quality, authorization for writes and reasonable abuse controls.
+
+## 22. GitHub and release workflow
+
+Repository: [jookllo/drivetest](https://github.com/jookllo/drivetest). The current branch is `master`. Initial application commit: `1fdac29`. The first push succeeded on 19 October 2026. Follow-up documentation commits may appear after that commit.
+
+This laptop's Git author is configured **for this repository** as `jookllo <jookllo@users.noreply.github.com>`. Author identity and SSH authentication are separate. Because port 22 timed out, the repository uses GitHub SSH on port 443 through a local `core.sshCommand` setting. This setting is not stored in Git or inherited by Dokploy. The remote remains `git@github.com:jookllo/drivetest.git`.
+
+Routine development:
+
+```bash
+git status
+git diff
+# Run appropriate checks from api/ before committing application changes.
+git add <reviewed-files>
+git commit -m "Describe the concrete change"
+git push origin master
+```
+
+Use branches/review before larger production changes. Do not force-push to resolve network failures. If SSH times out, inspect connectivity and the local SSH configuration; repeated author-name changes cannot fix it. Dokploy must have its own repository authorization.
+
+Keep `.env`, credentials, dependencies, SQL dumps, runtime caches/sessions/logs, local backups and generated ZIPs out of Git. Keep the SVG masters, edited label exports, application source, migrations, Composer lockfile, approved runtime mascot and vendored Vue file. Live admin edits belong to MySQL and require backups; pushing code does not publish or preserve those edits automatically.
+
+### Documentation maintenance
+
+Update section 1 for delivered behavior, section 12 for priorities, section 20 when deployment is actually tested, and section 21 when future features become real. Keep theme/mascot requirements in this file. Do not add a competing deployment README or product requirements file. `api/AGENTS.md` remains coding-agent instructions only.
