@@ -507,7 +507,7 @@ Do not include a leaderboard in the initial scope unless requested. A public ran
 | Presentation | Existing Vue interface, shared palette, blanket results mascot, local-only four-question demo | Full mobile/accessibility and browser regression testing outstanding |
 | Documentation / Git | One main README, agent-only instructions, `.gitignore`, first commit pushed to GitHub `master` | Database contents, local secrets and runtime files are not in Git |
 
-Verification on 19 October 2026: **31 PHP tests passed, 176 assertions**; Pint formatting completed; all three quiz JavaScript files parsed. Coverage includes guest ownership, answer-key disclosure, exact-set scoring, deadline boundaries, groups, snapshots, admin authorization, draft imports, publication conflicts, recovery and HTTPS behavior. This is not a full production or cross-browser certification. The production Dockerfile builds locally and the full disposable HTTP smoke test passes, including guest-session/private-artwork persistence after container restart. GitHub release checks are tracked below; Dokploy itself has not been verified.
+Verification on 19 October 2026: **31 PHP tests passed, 176 assertions**; Pint formatting completed; all three quiz JavaScript files parsed. Coverage includes guest ownership, answer-key disclosure, exact-set scoring, deadline boundaries, groups, snapshots, admin authorization, draft imports, publication conflicts, recovery and HTTPS behavior. This is not a full production or cross-browser certification. The production Dockerfile builds locally and the full disposable HTTP smoke test passes, including guest-session/private-artwork persistence after container restart. GitHub release checks are tracked below. Dokploy source/trigger/domain settings and deployment history have been inspected; production database initialization and endpoint verification are described in section 20 J.
 
 ### Release infrastructure status (19 October 2026)
 
@@ -521,7 +521,7 @@ Infrastructure [PR #1](https://github.com/jookllo/drivetest/pull/1) merged into 
 | Container smoke tests | Finished locally: migrations, 144 draft sign imports, private assets, HTTPS, CSRF and guest-session restart checks pass. Restart logic re-reads the ephemeral Docker host port | Keep these checks required for every PR |
 | Protected release branch | Configured in GitHub: `master` requires PR, both checks, up-to-date base and administrator enforcement; force pushes/deletion are disabled | Keep required check names aligned with CI; repository auto-merge is enabled |
 | GHCR publishing | Implemented for successful `master` runs only | First master run succeeded; verify selected tag when deploying |
-| Dokploy deployment | Dockerfile build type selected by owner; server-specific setup unverified | Complete sections 20 B–I and the P0 checks below |
+| Dokploy deployment | Verified GitHub source `jookllo/drivetest`, `master`, On Push, Autodeploy enabled, no watch-path filter, root build path, Dockerfile build; PR #1 and #2 merges deployed | Add persistent private storage, reviewed content, a production admin, backups and scheduler verification |
 
 ### Finished versus ready to launch
 
@@ -1149,7 +1149,7 @@ Set the application's runtime URL to:
 APP_URL=https://drivers-ntsa-signs-bywley-6dd85e-45-155-102-200.sslip.io
 ```
 
-The supplied Domains screenshot shows **Port: 3000**. This repository's Apache configuration listens on **80** (`Dockerfile` exposes 80). Routing to 3000 is a concrete configuration mismatch and a likely cause of the reported **502 Bad Gateway**. The screenshot alone does not prove the application container is healthy or identify its deployed commit.
+The supplied Domains screenshot shows **Port: 3000**. This repository's Apache configuration listens on **80** (`Dockerfile` exposes 80). Routing to 3000 is a concrete configuration mismatch and a likely cause of the reported **502 Bad Gateway**. A later dashboard inspection on 19 October confirmed the domain now routes to **80**, with HTTPS and letsencrypt; no further port change is needed unless settings change again.
 
 In the application's **Domains** tab, edit the existing domain:
 
@@ -1175,7 +1175,32 @@ If 502 remains:
 6. If the result changes to Laravel HTTP 500, inspect application logs and verify MySQL internal hostname, credentials, connectivity and migrations. A domain-port change does not create tables or content.
 7. If `/quiz` loads but reports no questions, routing is working; review and publish enough eligible questions and linked signs using section 14. Do not publish drafts just to suppress the empty state.
 
-A read-only HTTPS request to this domain’s `/quiz` returned HTTP 500 on 19 October 2026 after the screenshot was supplied. The reported 502 and the observed 500 are different failure states; application logs are needed to identify the current cause. The dashboard URL/access and live Dokploy deployment settings must be inspected before claiming the port is corrected or automatic deployment is active. Do not copy secrets, complete environment dumps, or webhook URLs into this document.
+A read-only HTTPS request to `/quiz` returned HTTP 500. Dashboard logs then identified the current cause: **“Unsupported cipher or incorrect key length”**, with Laravel using `AES-256-CBC`. The production `APP_KEY` is invalid. The earlier 502 routing problem and current encryption failure are distinct. Deployment status “done” confirms a completed deployment, not a healthy application.
+
+**Recovery, handled privately by the owner:**
+
+1. If production previously worked or contains encrypted data, restore the original valid key from the private backup. Replacing it can invalidate encrypted sessions/data; do not rotate a working production key casually.
+2. For a genuinely fresh installation, run `cd api` then `php artisan key:generate --show` locally. This prints a new key without changing the local `.env`. Copy the entire `base64:…` value privately into the application's Dokploy Environment `APP_KEY`, with no truncation, spaces or placeholder text. Do not paste it into chat, GitHub, this file or a build argument.
+3. Save and redeploy/reload the application so the startup script rebuilds cached configuration. Do not generate a new key on each restart.
+4. Verify HTTPS `/up`, `/quiz` and `/api/v1/quiz-session`, then review fresh logs. If another error appears, diagnose it separately; successful key correction does not prove migrations, MySQL access or content are ready.
+
+**Follow-up verified during recovery:** the owner corrected APP_KEY and the application was reloaded. HTTPS then returned 308 because `TRUSTED_PROXIES` still contained a placeholder. It was replaced with the observed Traefik source IP `10.0.1.19` and reloaded. This narrow allowlist is specific to the currently observed proxy; reverify it if Traefik is recreated or networking changes, rather than using a blanket wildcard. MySQL initially rejected the configured login with error 1045. After the owner corrected credentials privately, MySQL reported that `drivetest` did not exist. The database was created with `CREATE DATABASE IF NOT EXISTS`, and all five forward migrations completed successfully under the application OS user; no existing database was reset. After recovery, public HTTPS `/up`, `/quiz`, `/api/v1/quiz-session`, `/api/v1/classes` and `/api/v1/signs` all returned HTTP 200. Production content and admin accounts are not copied from the laptop. Prefer a dedicated least-privilege database user before launch.
+
+Verified deployment history includes master merge `ce1d18a605050b5fcf481cf3d46bf3c774683646` (PR #1) and `ad17304d274a0ac64b635fa2b9fa537ea7bea636` (PR #2), both marked done. Private credentials and deployment webhook URLs must never be copied into this guide.
+
+
+### Persistence audit (19 October 2026)
+
+The application's `DB_HOST` points to the Dokploy **KaDB** MySQL service and database `drivetest`; sessions use the database driver. Dashboard inspection found:
+
+| Component | Observed configuration | What survives / remaining risk |
+| --- | --- | --- |
+| MySQL | Named volume `app-projects-kadb-ps4ejp-data` mounted at `/var/lib/mysql` | Container replacement and reboot should preserve data while the volume/disk remains intact; not protection against disk loss or deletion |
+| Private sign artwork | Application Advanced tab says no volumes/mounts configured | Runtime imports under `/app/api/storage/app/private` are not durable across replacement; add the planned named volume after preserving any existing files |
+| Database backups | KaDB Backups tab says no backups configured | No Dokploy-managed off-server recovery is configured; any provider snapshots would need separate verification |
+| Source files | GitHub contains code and source SVGs | Useful for rebuilding code/artwork, but does not contain live questions, users, attempts or editorial changes |
+
+Before launch, preserve existing private files, mount a named volume at `/app/api/storage/app/private`, restore/import the required files into it, and verify them after a controlled redeploy. Configure off-server database and artwork backups with retention and a tested isolated restore. Keep the stable production APP_KEY and other recovery credentials in a private backup. A server reboot, a temporary provider outage, and permanent disk loss are different failure cases; a volume alone does not provide disaster recovery or uninterrupted availability.
 
 ### K. Troubleshooting reference
 
@@ -1265,7 +1290,9 @@ git push -u origin codex/your-change
 
 ### Does master automatically deploy to Dokploy?
 
-**The repository workflow currently does not call Dokploy.** It tests and publishes to GitHub Container Registry. Dokploy can independently react to a GitHub push if its integration/webhook and Auto Deploy setting are configured. Those external settings cannot be established by reading the workflow or the supplied domain screenshot.
+**Yes—verified in the Dokploy dashboard on 19 October 2026.** Drivers NTSA Signs uses GitHub repository `jookllo/drivetest`, branch `master`, trigger **On Push**, and **Autodeploy enabled**, with no watch-path filter. Deployments for both PR #1 and PR #2 merge commits are recorded as done. A merge to master therefore triggers a Dokploy Dockerfile build, including README-only merges.
+
+The repository Actions workflow itself does not call Dokploy: it independently tests and publishes to GHCR. Dokploy currently builds from Git rather than pulling that published image, and does not wait for the post-merge Actions run. Required PR checks protect the code before merge. Live health must still be verified after deployment.
 
 | Source / trigger | What happens after a master merge | What must be verified |
 | --- | --- | --- |
