@@ -513,7 +513,7 @@ Verification on 19 October 2026: **29 PHP tests passed, 168 assertions**; Pint f
 
 | Work | Correct location / owner | Done when |
 | --- | --- | --- |
-| Production container | Repository root `Dockerfile`, `.dockerignore`; `api/docker/` runtime files proposed in section 20 | Staging image builds; only `api/public` is served; imports can read sibling `signs/` |
+| Production container | Repository root `Dockerfile`, `.dockerignore`; `api/docker/` runtime files described in section 20 | Staging image builds; only `api/public` is served; imports can read sibling `signs/` |
 | Dokploy environment | Dokploy application, MySQL, volume, domain and job settings | HTTPS, sessions, DB, artwork and scheduled expiry survive redeploy |
 | Content review | Owner in `/mdosimimi`; source SVGs in `signs/svg/` | Enough verified questions for every advertised topic, filter and length |
 | Question coverage | MySQL via editor or `questions:import` | Mixed default has at least 4 names, 2 classes, 2 subcategories, 2 general slots with valid uniqueness/groups; twice that for 20, and 10/20 for each offered focused topic |
@@ -917,7 +917,7 @@ A future OCR/extraction service can suggest text, but it is not a prerequisite f
 
 ### Deployment status and recommended topology
 
-**Dokploy is the chosen deployment platform. No Dokploy services, production secrets, domain or container build have been configured by this documentation change. There is currently no committed Dockerfile or Compose configuration.** The reference files below must be created, built and tested in staging before choosing Dockerfile builds. Do not assume pushing the repository already produces a working production deployment.
+**Dokploy is the chosen deployment platform.** Production build files and GitHub CI are included in this repository. Dokploy services, runtime secrets, domain, persistent storage and release migrations still need the environment-specific setup below. Pushing code alone does not complete production deployment.
 
 Start with one Dokploy Application for Laravel/Apache, one Dokploy MySQL service, a named volume for private SVG files, and one scheduled application job. Traefik terminates HTTPS and forwards to Apache; Laravel handles both the Vue pages and API on the same origin. Redis and a queue worker are unnecessary for the current synchronous features. This is a project-specific deployment recommendation; Dokploy supports several build types, including explicit Dockerfiles. See [Dokploy build settings](https://docs.dokploy.com/docs/core/applications/build-type).
 
@@ -926,7 +926,7 @@ Start with one Dokploy Application for Laravel/Apache, one Dokploy MySQL service
 | Repository | `https://github.com/jookllo/drivetest.git` |
 | Branch | `master` |
 | Build context | Repository root `.`; **not just `api/`** |
-| Proposed Dockerfile path | `Dockerfile` at repository root |
+| Dockerfile path | `Dockerfile` at repository root |
 | Container Laravel directory | `/app/api` in the reference layout below |
 | Public document root | `/app/api/public` |
 | Sibling source assets | `/app/signs/manifest.json`, `/app/signs/svg/`, `/app/sign-labels.json` |
@@ -940,116 +940,29 @@ Start with one Dokploy Application for Laravel/Apache, one Dokploy MySQL service
 
 The sibling layout is required by `SignCatalogImport`, which resolves `../signs/manifest.json` from Laravel's base path. A build containing only `api/` may serve pages but fail all source catalog imports. Public files already include the Vue runtime and mascot, so no Node/Vite build is needed for this UI.
 
-### A. Prepare production build files
+### A. Production build and automated checks
 
-These are **reference templates to implement**, not existing files or verified image builds. The paths match the rest of this runbook. Use a PHP/Apache image compatible with PHP 8.3 and the locked Composer dependencies; pin tested image digests for a reproducible release. Never use `php artisan serve`, `composer run dev`, or the root Python gallery server as the production web server.
+The root [Dockerfile](Dockerfile) uses pinned PHP 8.3/Apache and Composer base images. Runtime configuration lives in [api/docker/](api/docker/): Apache serves only `api/public`, PHP logs to stderr, and startup requires an existing `APP_KEY` before caching configuration and views. Update image digests deliberately and rerun CI to receive upstream fixes.
 
-Proposed root `Dockerfile`:
+[.dockerignore](.dockerignore) excludes secrets, local dependencies, caches, tests and the browser-test account seeder. The image includes the sibling source catalog required for imports. Startup never generates keys, migrates, imports or publishes content automatically.
 
-```dockerfile
-FROM php:8.3-apache-bookworm
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends git unzip libonig-dev libzip-dev libicu-dev \
-    && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring zip intl bcmath opcache \
-    && a2enmod rewrite \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
-WORKDIR /app/api
-COPY api/ /app/api/
-COPY signs/manifest.json /app/signs/manifest.json
-COPY signs/svg/ /app/signs/svg/
-COPY sign-labels.json /app/sign-labels.json
-COPY api/docker/apache.conf /etc/apache2/sites-available/000-default.conf
-COPY api/docker/start.sh /usr/local/bin/drivetest-start
-
-RUN mkdir -p storage/app/private storage/framework/cache/data \
-      storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
-    && COMPOSER_ALLOW_SUPERUSER=1 composer install \
-      --no-dev --prefer-dist --no-interaction --optimize-autoloader \
-    && composer check-platform-reqs --no-dev \
-    && chmod +x /usr/local/bin/drivetest-start \
-    && chown -R www-data:www-data storage bootstrap/cache
-
-EXPOSE 80
-CMD ["/usr/local/bin/drivetest-start"]
-```
-
-Proposed `api/docker/apache.conf`:
-
-```apache
-<VirtualHost *:80>
-    DocumentRoot /app/api/public
-    <Directory /app/api/public>
-        Options -Indexes +FollowSymLinks
-        AllowOverride All
-        Require all granted
-    </Directory>
-    ErrorLog /proc/self/fd/2
-    CustomLog /proc/self/fd/1 combined
-</VirtualHost>
-```
-
-Proposed `api/docker/start.sh` (save with Unix line endings):
-
-```sh
-#!/bin/sh
-set -eu
-cd /app/api
-mkdir -p storage/app/private storage/framework/cache/data \
-  storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
-su -s /bin/sh www-data -c 'php artisan config:cache && php artisan view:cache'
-exec apache2-foreground
-```
-
-This caches configuration **at runtime after Dokploy injects environment variables**. No migrations, imports, user creation, destructive resets or key generation run automatically on container restart. Migration failure must stop a release, not be hidden in a startup loop. For large volumes, replace recursive ownership correction with a tested one-time initialization so restarts remain quick.
-
-Proposed root `.dockerignore`:
-
-```text
-.git
-**/.env
-**/.env.*
-!**/.env.example
-**/auth.json
-**/*.pem
-**/*.key
-**/node_modules
-api/vendor
-api/bootstrap/cache/*.php
-api/storage
-!api/storage/**/.gitignore
-api/tests
-**/*.sql
-**/*.sql.gz
-**/*.sqlite*
-**/*.log
-**/__pycache__
-signs/backups
-signs/road-signs-svg.zip
-.codex
-.tmp
-tmp
-```
-
-The build recreates writable storage directories; actual private SVGs come from the persistent volume/import. Do not copy your laptop `.env`, cached config, sessions or test fixtures into an image. `.gitignore` and `.dockerignore` have different jobs: the latter is required even when the Git repository is clean.
-
-After implementing these files, build from the repository root in an environment with Docker:
+From the repository root, with Docker running:
 
 ```bash
-docker build -t drivetest:staging .
+docker build -t drivetest:ci .
+bash api/tests/Deployment/smoke.sh drivetest:ci
 ```
 
-Exercise the image against a separate staging database and volume before production. This README change does not claim that command has passed. If you choose Nixpacks/Railpack instead, establish the same sibling assets, PHP extensions, public document root, runtime environment, storage and scheduler behavior explicitly; automatic detection of this repository root is not enough.
+The smoke test creates disposable MySQL, private storage and an isolated network. It checks migrations, catalog import, real HTTP routes/assets, HTTPS proxy handling, CSRF rejection, draft privacy and guest-session persistence after restart, then removes its resources. It never connects to the laptop or production database. Its wildcard trusted proxy setting is limited to a loopback-bound disposable container; production must use the actual proxy range.
+
+GitHub runs these checks through [.github/workflows/ci.yml](.github/workflows/ci.yml). Passing CI is necessary but does not validate your production DNS, TLS, backups, scheduler or content availability; complete the staging checks below.
 
 ### B. Create the project, application and database
 
 1. Create a DriveTest project/environment in Dokploy; use separate staging and production services, databases, volumes and keys.
 2. Connect GitHub using Dokploy's provider integration and authorize this repository. Select `jookllo/drivetest`, branch `master`. Private repository access belongs to the Dokploy server/integration; your laptop's SSH key/configuration is not automatically available there. See [Dokploy providers](https://docs.dokploy.com/docs/core/providers).
 3. Create a MySQL service and deploy it first. Use the tested MySQL major version, a persistent database volume and a dedicated `drivetest_app` account scoped to `drivetest`. Keep MySQL private; do not publish port 3306 to the internet. Record the internal hostname and port supplied by Dokploy. See [Dokploy databases](https://docs.dokploy.com/docs/core/databases).
-4. Create the Application using the Dockerfile settings in the table above **after committing the build files**. Leave any build-stage override empty for the single-stage reference image.
+4. Create the Application using the Dockerfile settings in the table above from a tested release commit. Leave any build-stage override empty for the single-stage image.
 5. Make sure the app and MySQL can communicate on their internal network. `DB_HOST=127.0.0.1` inside the web container points to the web container itself, not your MySQL service.
 6. Add the named volume and environment variables before deployment. Keep automatic deployments disabled until the migration/backup/smoke procedure has been rehearsed.
 
@@ -1200,7 +1113,7 @@ Release sequence:
 2. Back up the production DB and private files before migrations/content imports. Verify that a previous restore drill succeeded.
 3. Build the candidate image, deploy to staging and run the smoke checks.
 4. For production, initially use a controlled maintenance window. Keep traffic gated while starting the new image and running `php artisan migrate --force` in its container. Reapply maintenance/access gating across replacement containers if needed: file-based `artisan down` state is container-local.
-5. Rebuild runtime config/views after environment changes (the reference startup does this), verify health/smoke tests, then reopen traffic. Never silently regenerate `APP_KEY`.
+5. Rebuild runtime config/views after environment changes (the startup script does this), verify health/smoke tests, then reopen traffic. Never silently regenerate `APP_KEY`.
 6. If code deployment fails, return to the known-good image/commit only if it is compatible with the current schema. Image rollback does not undo database migrations. Use a forward fix or a coordinated DB/files restore for incompatible migrations; assess data written since the backup first.
 7. Confirm the scheduler, backup jobs and external monitoring still target the current service. Once this process is reliable, automate safe steps in CI/CD; a push is not automatically a tested production release.
 
@@ -1248,24 +1161,40 @@ Do not introduce leaderboards or “exam certified” claims based on this publi
 
 ## 22. GitHub and release workflow
 
-Repository: [jookllo/drivetest](https://github.com/jookllo/drivetest). The current branch is `master`. Initial application commit: `1fdac29`. The first push succeeded on 19 October 2026. Follow-up documentation commits may appear after that commit.
+Repository: [jookllo/drivetest](https://github.com/jookllo/drivetest). `master` is the release branch; develop on `codex/<change>` branches and open a pull request into `master`.
 
-This laptop's Git author is configured **for this repository** as `jookllo <jookllo@users.noreply.github.com>`. Author identity and SSH authentication are separate. Because port 22 timed out, the repository uses GitHub SSH on port 443 through a local `core.sshCommand` setting. This setting is not stored in Git or inherited by Dokploy. The remote remains `git@github.com:jookllo/drivetest.git`.
+### Checks before merging
 
-Routine development:
+The `DriveTest CI` workflow runs on pull requests to `master`, pushes to `master` or `codex/**`, and manual dispatch. It has two required check names:
+
+- `PHP, MySQL and JavaScript checks`: validate Composer metadata, install locked dependencies, check PHP formatting and JavaScript syntax, then run the application tests on disposable MySQL 8.
+- `Production image and HTTP smoke tests`: build the production Dockerfile and run the disposable real-HTTP checks described in section 20.
+
+Configure GitHub branch protection for `master` to require a pull request, both successful checks, an up-to-date branch, and enforcement for administrators. Block force pushes and deletion. A solo-maintainer repository need not require another person's approval. These are repository settings, not settings that YAML can enforce. Enable repository auto-merge, then enable it on each reviewed PR to merge after requirements pass. New commits must pass again; failing checks must be fixed on the branch.
 
 ```bash
-git status
-git diff
-# Run appropriate checks from api/ before committing application changes.
+git switch -c codex/describe-change
+# Edit and run the relevant local checks.
 git add <reviewed-files>
 git commit -m "Describe the concrete change"
-git push origin master
+git push -u origin codex/describe-change
+# Open a PR into master; review it and enable auto-merge.
 ```
 
-Use branches/review before larger production changes. Do not force-push to resolve network failures. If SSH times out, inspect connectivity and the local SSH configuration; repeated author-name changes cannot fix it. Dokploy must have its own repository authorization.
+### Image publishing and Dokploy
 
-Keep `.env`, credentials, dependencies, SQL dumps, runtime caches/sessions/logs, local backups and generated ZIPs out of Git. Keep the SVG masters, edited label exports, application source, migrations, Composer lockfile, approved runtime mascot and vendored Vue file. Live admin edits belong to MySQL and require backups; pushing code does not publish or preserve those edits automatically.
+After a successful `master` run, CI publishes the tested image as `ghcr.io/jookllo/drivetest:sha-<full-commit-sha>` and `:latest`. PRs and development branches do not publish images. Publishing uses GitHub's short-lived workflow token; no production credentials are needed in Actions. A failed publish still fails the image job. Prefer the immutable commit tag for deployment and rollback.
+
+Choose one deployment route:
+
+1. **Current Dokploy Git source + Dockerfile build:** repository root build context, `Dockerfile`, branch `master`, internal port `80`. Dokploy builds the merged source itself. Keep deployment manual while verifying migrations and backups. An automatic Git deployment can start on merge before the post-merge image job finishes, so it is not equivalent to deploying the published CI image.
+2. **Deploy the image built by Actions:** change Dokploy's source to Docker image and select the successful `ghcr.io/jookllo/drivetest:sha-<full-commit-sha>` tag. Dockerfile build settings are then unnecessary. If the package is private, configure a registry credential with read access privately in Dokploy. Preserve all runtime environment, MySQL networking, volume, HTTPS and scheduler settings from section 20.
+
+This workflow does not invoke a Dokploy deployment webhook. Automatic production deployment after successful image publishing is a later step, once staging and migration/rollback procedures are verified.
+
+This laptop uses repository-local author `jookllo <jookllo@users.noreply.github.com>` and GitHub SSH over port 443 because port 22 timed out. Author identity and SSH authentication are separate. The local `core.sshCommand` is not inherited by Dokploy, which needs its own repository authorization. Do not force-push to resolve connectivity failures.
+
+Keep `.env`, credentials, dependencies, SQL dumps, runtime caches/sessions/logs, local backups and generated ZIPs out of Git. Live admin edits belong to MySQL and require backups; pushing code does not preserve or publish those edits automatically.
 
 ### Documentation maintenance
 

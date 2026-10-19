@@ -1,0 +1,112 @@
+name: DriveTest CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master, 'codex/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: drivetest-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: PHP, MySQL and JavaScript checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: api
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: drivetest_test
+          MYSQL_USER: drivetest_ci
+          MYSQL_PASSWORD: ci-disposable-password
+          MYSQL_ROOT_PASSWORD: ci-disposable-root-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: drivetest_test
+      DB_USERNAME: drivetest_ci
+      DB_PASSWORD: ci-disposable-password
+      SESSION_DRIVER: array
+      CACHE_STORE: array
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring, intl, zip, bcmath
+          coverage: none
+          tools: composer:v2
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - name: Install locked PHP dependencies
+        run: |
+          composer validate --strict
+          composer install --prefer-dist --no-interaction --no-progress
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+      - name: Check PHP formatting
+        run: |
+          vendor/bin/pint --format agent
+          git diff --exit-code
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/assets/quiz/app.js
+          node --check public/assets/quiz/admin.js
+          node --check public/assets/quiz/demo.js
+      - name: Test migrations, API and quiz behavior on isolated MySQL
+        run: php artisan test --compact
+
+  image:
+    name: Production image and HTTP smoke tests
+    needs: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Build production image without application secrets
+        run: docker build --pull -t drivetest:ci .
+      - name: Test image with disposable MySQL and private storage
+        run: bash api/tests/Deployment/smoke.sh drivetest:ci
+      - name: Publish tested image to GitHub Container Registry
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          IMAGE_REPOSITORY: ${{ github.repository }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${IMAGE_REPOSITORY,,}"
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+          trap 'docker logout ghcr.io' EXIT
+          docker tag drivetest:ci "$image:sha-$RELEASE_SHA"
+          docker tag drivetest:ci "$image:latest"
+          docker push "$image:sha-$RELEASE_SHA"
+          docker push "$image:latest"
